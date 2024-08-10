@@ -6,9 +6,11 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Render {
 
+    // TODO: rename to object render or something
     private SceneRender sceneRender;
     private GuiRender guiRender;
     private SkyBoxRender skyBoxRender;
+    private BlockRender blockRender;
 
     public Render(Window window) {
         GL.createCapabilities();
@@ -19,6 +21,7 @@ public class Render {
         sceneRender = new SceneRender();
         guiRender = new GuiRender(window);
         skyBoxRender = new SkyBoxRender();
+        blockRender = new BlockRender();
     }
 
     public void cleanup() {
@@ -32,6 +35,7 @@ public class Render {
         glViewport(0, 0, window.getWidth(), window.getHeight());
 
         skyBoxRender.render(scene);
+        blockRender.render(scene);
         sceneRender.render(scene);
         guiRender.render(scene);
     }

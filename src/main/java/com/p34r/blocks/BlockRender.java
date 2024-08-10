@@ -6,18 +6,19 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL30.*;
 
-public class SceneRender {
+public class BlockRender {
 
     private ShaderProgram shaderProgram;
     private UniformsMap uniformsMap;
 
-    public SceneRender() {
+    public BlockRender() {
         List<ShaderProgram.ShaderModuleData> shaderModuleDataList = new ArrayList<>();
-        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/scene.vs", GL_VERTEX_SHADER));
-        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/scene.fs", GL_FRAGMENT_SHADER));
+        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.vs", GL_VERTEX_SHADER));
+        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.fs", GL_FRAGMENT_SHADER));
         shaderProgram = new ShaderProgram(shaderModuleDataList);
 
         createUniforms();
+
     }
 
     public void cleanup() {
@@ -32,25 +33,18 @@ public class SceneRender {
         uniformsMap.setUniform("txtSampler", 0);
 
 
-        Collection<Model> models = scene.getModelMap().values();
-        TextureCache textureCache = scene.getTextureCache();
-        for (Model model : models) {
-            List<Entity> entities = model.getEntitiesList();
+        Matrix4f cpos = new Matrix4f();
+        cpos.translate(0, 0, 0);
+        uniformsMap.setUniform("modelMatrix", cpos);
+        glActiveTexture(GL_TEXTURE0);
+        Texture ctexture = scene.getTextureCache().get("res/textures/cube.png");
+        ctexture.bind();
 
-            for (Material material : model.getMaterialList()) {
-                Texture texture = textureCache.get(material.getTexturePath());
-                glActiveTexture(GL_TEXTURE0);
-                texture.bind();
-
-                for (Mesh mesh : material.getMeshList()) {
+        scene.getMeshMap().values().forEach(mesh -> {
                     glBindVertexArray(mesh.getVaoId());
-                    for (Entity entity : entities) {
-                        uniformsMap.setUniform("modelMatrix", entity.getModelMatrix());
-                        glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
-                    }
+                    glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
                 }
-            }
-        }
+        );
 
         glBindVertexArray(0);
 

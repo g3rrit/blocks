@@ -13,100 +13,115 @@ public class App {
     private Scene scene;
     private Render render;
 
+    /**
+     * Mesh:
+     *      V3D *--------* V2C
+     *         /|       /|
+     *        / |V0A   / |
+     *   V7B *--*-----*  * V1B
+     *       | /   V6A| /
+     *       |/       |/
+     *   V4C *--------* V5D
+     *
+     * Texture:
+     *     D *--------* C
+     *       |        |
+     *       |        |
+     *     A *--------* B
+     */
     float[] positions = new float[]{
             // V0
-            -0.5f, 0.5f, 0.5f,
+            0, 0, 0,
             // V1
-            -0.5f, -0.5f, 0.5f,
+            1, 0, 0,
             // V2
-            0.5f, -0.5f, 0.5f,
+            1, 1, 0,
             // V3
-            0.5f, 0.5f, 0.5f,
+            0, 1, 0,
             // V4
-            -0.5f, 0.5f, -0.5f,
+            0, 0, 1,
             // V5
-            0.5f, 0.5f, -0.5f,
+            1, 0, 1,
             // V6
-            -0.5f, -0.5f, -0.5f,
+            1, 1, 1,
             // V7
-            0.5f, -0.5f, -0.5f,
-
-            // For text coords in top face
-            // V8: V4 repeated
-            -0.5f, 0.5f, -0.5f,
-            // V9: V5 repeated
-            0.5f, 0.5f, -0.5f,
-            // V10: V0 repeated
-            -0.5f, 0.5f, 0.5f,
-            // V11: V3 repeated
-            0.5f, 0.5f, 0.5f,
-
-            // For text coords in right face
-            // V12: V3 repeated
-            0.5f, 0.5f, 0.5f,
-            // V13: V2 repeated
-            0.5f, -0.5f, 0.5f,
-
-            // For text coords in left face
-            // V14: V0 repeated
-            -0.5f, 0.5f, 0.5f,
-            // V15: V1 repeated
-            -0.5f, -0.5f, 0.5f,
-
-            // For text coords in bottom face
-            // V16: V6 repeated
-            -0.5f, -0.5f, -0.5f,
-            // V17: V7 repeated
-            0.5f, -0.5f, -0.5f,
-            // V18: V1 repeated
-            -0.5f, -0.5f, 0.5f,
-            // V19: V2 repeated
-            0.5f, -0.5f, 0.5f,
+            0, 1, 1,
+            // V0
+            0, 0, 1,
+            // V1
+            1, 0, 1,
+            // V2
+            1, 1, 1,
+            // V3
+            0, 1, 1,
+            // V4
+            0, 0, 2,
+            // V5
+            1, 0, 2,
+            // V6
+            1, 1, 2,
+            // V7
+            0, 1, 2,
     };
     float[] textCoords = new float[]{
-            0.0f, 0.0f,
-            0.0f, 0.5f,
-            0.5f, 0.5f,
-            0.5f, 0.0f,
-
-            0.0f, 0.0f,
-            0.5f, 0.0f,
-            0.0f, 0.5f,
-            0.5f, 0.5f,
-
-            // For text coords in top face
-            0.0f, 0.5f,
-            0.5f, 0.5f,
-            0.0f, 1.0f,
-            0.5f, 1.0f,
-
-            // For text coords in right face
-            0.0f, 0.0f,
-            0.0f, 0.5f,
-
-            // For text coords in left face
-            0.5f, 0.0f,
-            0.5f, 0.5f,
-
-            // For text coords in bottom face
-            0.5f, 0.0f,
-            1.0f, 0.0f,
-            0.5f, 0.5f,
-            1.0f, 0.5f,
+            // A
+            0, 1,
+            // B
+            1, 1,
+            // C
+            1, 0,
+            // D
+            0, 0,
+            // C
+            1, 0,
+            // D
+            0, 0,
+            // A
+            0, 1,
+            // B
+            1, 1,
+            // A
+            0, 1,
+            // B
+            1, 1,
+            // C
+            1, 0,
+            // D
+            0, 0,
+            // C
+            1, 0,
+            // D
+            0, 0,
+            // A
+            0, 1,
+            // B
+            1, 1,
     };
     int[] indices = new int[]{
             // Front face
-            0, 1, 3, 3, 1, 2,
-            // Top Face
-            8, 10, 11, 9, 8, 11,
-            // Right face
-            12, 13, 7, 5, 12, 7,
-            // Left face
-            14, 6, 15, 6, 14, 4,
-            // Bottom face
-            19, 18, 16, 19, 16, 17,
+            7, 4, 5, 5, 6, 7,
             // Back face
-            7, 6, 4, 7, 4, 5,
+            2, 1, 0, 0, 3, 2,
+            // Top face
+            3, 7, 6, 6, 2, 3,
+            // Bottom face
+            4, 0, 1, 1, 5, 4,
+            // Left face
+            3, 0, 4, 4, 7, 3,
+            // Right face
+            6, 5, 1, 1, 2, 6,
+            // Front face
+            7, 4, 5, 5, 6, 7,
+            // Back face
+            2, 1, 0, 0, 3, 2,
+            // Top face
+            3, 7, 6, 6, 2, 3,
+            // Bottom face
+            4, 0, 1, 1, 5, 4,
+            // Left face
+            3, 0, 4, 4, 7, 3,
+            // Right face
+            6, 5, 1, 1, 2, 6,
     };
 
     public App() {
@@ -228,8 +243,11 @@ public class App {
         Logger.info("Starting app");
         App app = new App();
 
-        Mesh mesh = new Mesh(app.positions, app.textCoords, app.indices);
-        app.scene.addMesh("quad", mesh);
+        //Mesh mesh = new Mesh(app.positions, app.textCoords, app.indices);
+        //app.scene.addMesh("quad", mesh);
+
+        Chunk chunk = new Chunk(0, 0, 0);
+        app.scene.addMesh("chunk1", chunk.getMesh());
 
         app.run();
         app.cleanup();
