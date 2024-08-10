@@ -1,7 +1,6 @@
 package com.p34r.blocks;
 
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.util.*;
@@ -43,6 +42,18 @@ public class UniformsMap {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(getUniformLocation(uniformName), false, value.get(stack.mallocFloat(16)));
         }
+    }
+
+    public void setUniform(String uniformName, float value) {
+        glUniform1f(getUniformLocation(uniformName), value);
+    }
+
+    public void setUniform(String uniformName, Vector3f value) {
+        glUniform3f(getUniformLocation(uniformName), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String uniformName, Vector4f value) {
+        glUniform4f(getUniformLocation(uniformName), value.x, value.y, value.z, value.w);
     }
 
     public void setUniform(String uniformName, Vector2f value) {

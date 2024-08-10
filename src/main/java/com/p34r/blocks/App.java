@@ -1,6 +1,7 @@
 package com.p34r.blocks;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.tinylog.Logger;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -146,6 +147,16 @@ public class App {
         cubeEntity.setRotation(1, 0, 0, 60);
         cubeEntity.updateModelMatrix();
         scene.addEntity(cubeEntity);
+
+        SceneLights sceneLights = new SceneLights();
+        sceneLights.getAmbientLight().setIntensity(0.3f);
+        scene.setSceneLights(sceneLights);
+        sceneLights.getPointLights().add(new PointLight(new Vector3f(1, 1, 1),
+                new Vector3f(0, 0, -1.4f), 1.0f));
+
+        LightControls lightControls = new LightControls(scene);
+        scene.setGui(lightControls);
+
     }
 
     private void cleanup() {
@@ -246,8 +257,6 @@ public class App {
         //Mesh mesh = new Mesh(app.positions, app.textCoords, app.indices);
         //app.scene.addMesh("quad", mesh);
 
-        Chunk chunk = new Chunk(0, 0, 0);
-        app.scene.addMesh("chunk1", chunk.getMesh());
 
         app.run();
         app.cleanup();

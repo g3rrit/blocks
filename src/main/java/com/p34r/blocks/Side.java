@@ -5,6 +5,6 @@ public class Side {
     public static final int BACK = 1;
     public static final int TOP = 2;
     public static final int BOTTOM = 3;
-    public static final int LEFT = 4;
-    public static final int RIGHT = 5;
+    public static final int RIGHT = 4;
+    public static final int LEFT = 5;
 }

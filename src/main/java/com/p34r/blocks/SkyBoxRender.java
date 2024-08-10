@@ -59,11 +59,11 @@ public class SkyBoxRender {
             glActiveTexture(GL_TEXTURE0);
             texture.bind();
 
-            for (Mesh mesh : material.getMeshList()) {
-                glBindVertexArray(mesh.getVaoId());
+            for (ObjMesh objMesh : material.getMeshList()) {
+                glBindVertexArray(objMesh.getVaoId());
 
                 uniformsMap.setUniform("modelMatrix", skyBoxEntity.getModelMatrix());
-                glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, objMesh.getNumVertices(), GL_UNSIGNED_INT, 0);
             }
         }
 

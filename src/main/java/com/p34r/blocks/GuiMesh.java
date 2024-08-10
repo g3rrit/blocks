@@ -6,7 +6,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class GuiMesh {
+public class GuiMesh implements Mesh {
 
     private int indicesVBO;
     private int vaoId;
@@ -32,6 +32,7 @@ public class GuiMesh {
         glBindVertexArray(0);
     }
 
+    @Override
     public void cleanup() {
         glDeleteBuffers(indicesVBO);
         glDeleteBuffers(verticesVBO);
@@ -42,6 +43,7 @@ public class GuiMesh {
         return indicesVBO;
     }
 
+    @Override
     public int getVaoId() {
         return vaoId;
     }

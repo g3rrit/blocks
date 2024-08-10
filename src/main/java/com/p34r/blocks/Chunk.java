@@ -1,6 +1,5 @@
 package com.p34r.blocks;
 
-import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class Chunk {
      */
     private Chunk[] neighbors;
 
-    private Mesh mesh;
+    private BlockMesh[] blockMeshes;
 
     public Chunk(int x, int y, int z) {
         this.pos = new Vector2i(x, y);
@@ -36,16 +35,15 @@ public class Chunk {
             }
         }
         this.neighbors = new Chunk[6];
+        this.blockMeshes = new BlockMesh[6];
 
         updateMesh();
     }
 
     private void updateMesh() {
-        ArrayList<BlockMesh> blockMeshes = new ArrayList<>();
+        ArrayList<BlockGrid> blockGrids = new ArrayList<>();
 
-        int verticesCount = 0;
-        int textCoordsCount = 0;
-        int indicesCount = 0;
+        int indicesOffset[] = new int[6];
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
@@ -53,6 +51,7 @@ public class Chunk {
                     if (blocks[x][y][z] == BlockType.AIR) {
                         continue;
                     }
+
                     // TODO: check for neighbors in other chunks
                     BlockType[] blockNeighbors = new BlockType[] {
                             (z + 1 >= CHUNK_SIZE) ? null : blocks[x][y][z + 1],
@@ -63,51 +62,67 @@ public class Chunk {
                             (x + 1 >= CHUNK_SIZE) ? null : blocks[x + 1][y][z],
                     };
 
-                    BlockMesh blockMesh = new BlockMesh(x, y, z, 0, 0, verticesCount / 3, blockNeighbors);
+                    BlockGrid blockGrid = new BlockGrid(blocks[x][y][z], x, y, z, indicesOffset, blockNeighbors);
 
-                    if (blockMesh.isEmpty()) {
+                    if (blockGrid.isEmpty()) {
                         continue;
                     }
 
-                    verticesCount += blockMesh.verticesCount();
-                    textCoordsCount += blockMesh.textCoordsCount();
-                    indicesCount += blockMesh.indicesCount();
+                    for (int i = 0; i < 6; i++) {
+                        // TODO: there will be always 4 vertices (* 3)
+                        indicesOffset[i] = blockGrid.verticesCount(i) / 3;
+                    }
 
-                    blockMeshes.add(blockMesh);
+                    blockGrids.add(blockGrid);
                 }
             }
         }
 
-        float[] vertices = new float[verticesCount];
-        float[] textCoords = new float[textCoordsCount];
-        int[] indices = new int[indicesCount];
+        for (int side = 0; side < 6; side++) {
 
-        {
-            int iV = 0;
-            int iT = 0;
-            int iI = 0;
-            for (BlockMesh blockMesh : blockMeshes) {
-                float[] verticesB = blockMesh.getVertices();
-                float[] textCoordsB = blockMesh.getTextCoords();
-                int[] indicesB = blockMesh.getIndices();
+            int verticesCount = 0;
+            int indicesCount = 0;
 
-                for (float v : verticesB) {
-                    vertices[iV++] = v;
-                }
-                for (float t : textCoordsB) {
-                    textCoords[iT++] = t;
-                }
-                for (int i: indicesB) {
-                    indices[iI++] = i;
+            for (BlockGrid blockGrid : blockGrids) {
+                verticesCount += blockGrid.verticesCount(side);
+                indicesCount += blockGrid.indicesCount(side);
+            }
+
+            float[] vertices = new float[verticesCount];
+            int[] indices = new int[indicesCount];
+
+            {
+                int iV = 0;
+                int iI = 0;
+                for (BlockGrid blockGrid : blockGrids) {
+                    if (blockGrid.isEmpty(side)) {
+                        continue;
+                    }
+
+                    float[] verticesB = blockGrid.getVertices(side);
+                    int[] indicesB = blockGrid.getIndices(side);
+
+                    for (float v : verticesB) {
+                        vertices[iV++] = v;
+                    }
+                    for (int i : indicesB) {
+                        indices[iI++] = i;
+                    }
                 }
             }
-        }
 
-        this.mesh = new Mesh(vertices, textCoords, indices);
+            this.blockMeshes[side] = new BlockMesh(vertices, indices);
+        }
     }
 
-    public Mesh getMesh() {
-        return this.mesh;
+    public void cleanup() {
+        for (BlockMesh blockMesh : blockMeshes) {
+            blockMesh.cleanup();
+        }
+    }
+
+    public BlockMesh getMesh(int side) {
+        return this.blockMeshes[side];
     }
 
     public BlockType getBlock(int x, int y, int z) {

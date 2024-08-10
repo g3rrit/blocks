@@ -18,7 +18,6 @@ public class BlockRender {
         shaderProgram = new ShaderProgram(shaderModuleDataList);
 
         createUniforms();
-
     }
 
     public void cleanup() {
@@ -28,23 +27,26 @@ public class BlockRender {
     public void render(Scene scene) {
         shaderProgram.bind();
 
+        //SceneLights.updateLights(scene, uniformsMap);
+
         uniformsMap.setUniform("projectionMatrix", scene.getProjection().getProjMatrix());
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
-        uniformsMap.setUniform("txtSampler", 0);
 
 
         Matrix4f cpos = new Matrix4f();
         cpos.translate(0, 0, 0);
         uniformsMap.setUniform("modelMatrix", cpos);
         glActiveTexture(GL_TEXTURE0);
-        Texture ctexture = scene.getTextureCache().get("res/textures/cube.png");
+        Texture ctexture = scene.getTextureCache().get("res/textures/cube1.png");
         ctexture.bind();
 
-        scene.getMeshMap().values().forEach(mesh -> {
-                    glBindVertexArray(mesh.getVaoId());
-                    glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
-                }
-        );
+        for (int side = 0; side < 6; side++) {
+            for (Chunk chunk : scene.getChunks()) {
+                BlockMesh mesh = chunk.getMesh(side);
+                glBindVertexArray(mesh.getVaoId());
+                glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
+            }
+        }
 
         glBindVertexArray(0);
 
@@ -55,7 +57,8 @@ public class BlockRender {
         uniformsMap = new UniformsMap(shaderProgram.getProgramId());
         uniformsMap.createUniform("projectionMatrix");
         uniformsMap.createUniform("viewMatrix");
-        uniformsMap.createUniform("txtSampler");
         uniformsMap.createUniform("modelMatrix");
+
+        //SceneLights.createUniforms(uniformsMap);
     }
 }
