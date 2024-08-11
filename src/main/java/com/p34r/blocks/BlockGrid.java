@@ -1,5 +1,7 @@
 package com.p34r.blocks;
 
+import org.lwjgl.bgfx.BGFXCacheReadSizeCallback;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -8,6 +10,7 @@ public class BlockGrid {
         public boolean empty = true;
         public float[] vertices = null;
         public int[] indices = null;
+        public float[] textCoords = null;
     }
 
     /**
@@ -83,10 +86,8 @@ public class BlockGrid {
      */
     public BlockGrid(BlockType blockType, int x, int y, int z, int[] indicesOffset, BlockType[] neighbors) {
         this.blockType = blockType;
-        //this.grids = new Grid[6];
 
         boolean[] facesActive = new boolean[6];
-        boolean[] verticesActive = new boolean[8];
 
         // calculate active faces
         for (int face = 0; face < 6; face++) {
@@ -103,117 +104,134 @@ public class BlockGrid {
         }
 
         // front
-        if (facesActive[Side.FRONT]) {
-            grids[Side.FRONT].empty = false;
-            grids[Side.FRONT].vertices = new float[]{
+        int side = Side.FRONT;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                 0 + x, 0 + y, 1 + z,
                 1 + x, 0 + y, 1 + z,
                 1 + x, 1 + y, 1 + z,
                 0 + x, 1 + y, 1 + z,
             };
-            grids[Side.FRONT].indices = new int[]{
-                    indicesOffset[Side.FRONT],
-                1 + indicesOffset[Side.FRONT],
-                3 + indicesOffset[Side.FRONT],
-                3 + indicesOffset[Side.FRONT],
-                1 + indicesOffset[Side.FRONT],
-                2 + indicesOffset[Side.FRONT],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
         }
 
         // back
-        if (facesActive[Side.BACK]) {
-            grids[Side.BACK].empty = false;
-            grids[Side.BACK].vertices = new float[]{
+        side = Side.BACK;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                     1 + x, 0 + y, 0 + z,
                     0 + x, 0 + y, 0 + z,
                     0 + x, 1 + y, 0 + z,
                     1 + x, 1 + y, 0 + z,
             };
-            grids[Side.BACK].indices = new int[]{
-                    indicesOffset[Side.BACK],
-                1 + indicesOffset[Side.BACK],
-                3 + indicesOffset[Side.BACK],
-                3 + indicesOffset[Side.BACK],
-                1 + indicesOffset[Side.BACK],
-                2 + indicesOffset[Side.BACK],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
         }
 
         // top
-        if (facesActive[Side.TOP]) {
-            grids[Side.TOP].empty = false;
-            grids[Side.TOP].vertices = new float[]{
+        side = Side.TOP;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                     0 + x, 1 + y, 1 + z,
                     1 + x, 1 + y, 1 + z,
                     1 + x, 1 + y, 0 + z,
                     0 + x, 1 + y, 0 + z,
             };
-            grids[Side.TOP].indices = new int[]{
-                    indicesOffset[Side.TOP],
-                1 + indicesOffset[Side.TOP],
-                3 + indicesOffset[Side.TOP],
-                3 + indicesOffset[Side.TOP],
-                1 + indicesOffset[Side.TOP],
-                2 + indicesOffset[Side.TOP],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
         }
 
         // bottom
-        if (facesActive[Side.BOTTOM]) {
-            grids[Side.BOTTOM].empty = false;
-            grids[Side.BOTTOM].vertices = new float[]{
+        side = Side.BOTTOM;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                     0 + x, 0 + y, 0 + z,
                     1 + x, 0 + y, 0 + z,
                     1 + x, 0 + y, 1 + z,
                     0 + x, 0 + y, 1 + z,
             };
-            grids[Side.BOTTOM].indices = new int[]{
-                    indicesOffset[Side.BOTTOM],
-                1 + indicesOffset[Side.BOTTOM],
-                3 + indicesOffset[Side.BOTTOM],
-                3 + indicesOffset[Side.BOTTOM],
-                1 + indicesOffset[Side.BOTTOM],
-                2 + indicesOffset[Side.BOTTOM],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
         }
 
         // right
-        if (facesActive[Side.RIGHT]) {
-            grids[Side.RIGHT].empty = false;
-            grids[Side.RIGHT].vertices = new float[]{
+        side = Side.RIGHT;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                     1 + x, 0 + y, 1 + z,
                     1 + x, 0 + y, 0 + z,
                     1 + x, 1 + y, 0 + z,
                     1 + x, 1 + y, 1 + z,
             };
-            grids[Side.RIGHT].indices = new int[]{
-                    indicesOffset[Side.RIGHT],
-                1 + indicesOffset[Side.RIGHT],
-                3 + indicesOffset[Side.RIGHT],
-                3 + indicesOffset[Side.RIGHT],
-                1 + indicesOffset[Side.RIGHT],
-                2 + indicesOffset[Side.RIGHT],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
         }
 
         // left
-        if (facesActive[Side.LEFT]) {
-            grids[Side.LEFT].empty = false;
-            grids[Side.LEFT].vertices = new float[]{
+        side = Side.LEFT;
+        if (facesActive[side]) {
+            grids[side].empty = false;
+            grids[side].vertices = new float[]{
                     0 + x, 0 + y, 0 + z,
                     0 + x, 0 + y, 1 + z,
                     0 + x, 1 + y, 1 + z,
                     0 + x, 1 + y, 0 + z,
             };
-            grids[Side.LEFT].indices = new int[]{
-                    indicesOffset[Side.LEFT],
-                1 + indicesOffset[Side.LEFT],
-                3 + indicesOffset[Side.LEFT],
-                3 + indicesOffset[Side.LEFT],
-                1 + indicesOffset[Side.LEFT],
-                2 + indicesOffset[Side.LEFT],
+            grids[side].indices = new int[]{
+                    indicesOffset[side],
+                1 + indicesOffset[side],
+                3 + indicesOffset[side],
+                3 + indicesOffset[side],
+                1 + indicesOffset[side],
+                2 + indicesOffset[side],
             };
+        }
+
+        for (side = 0; side < 6; side++) {
+            if (facesActive[side]) {
+                grids[side].textCoords = new float[]{
+                    0, 1,
+                    1, 1,
+                    0, 1,
+                    0, 0,
+                };
+            }
         }
     }
 
@@ -242,12 +260,24 @@ public class BlockGrid {
         return grids[side].indices.length;
     }
 
+    public int textCoordsCount(int side) {
+        if (grids[side].empty) {
+            return 0;
+        }
+
+        return grids[side].textCoords.length;
+    }
+
     public float[] getVertices(int side) {
         return grids[side].vertices;
     }
 
     public int[] getIndices(int side) {
         return grids[side].indices;
+    }
+
+    public float[] getTextCoords(int side) {
+        return grids[side].textCoords;
     }
 
     public BlockType getBlockType() {

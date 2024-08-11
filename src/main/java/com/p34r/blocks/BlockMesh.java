@@ -14,7 +14,7 @@ public class BlockMesh implements Mesh {
     private int vaoId;
     private List<Integer> vboIdList;
 
-    public BlockMesh(float[] positions, int[] indices) {
+    public BlockMesh(float[] positions, int[] indices, float[] textCoords) {
         numVertices = indices.length;
         vboIdList = new ArrayList<>();
 
@@ -30,6 +30,16 @@ public class BlockMesh implements Mesh {
         glBufferData(GL_ARRAY_BUFFER, positionsBuffer, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        // Texture coordinates VBO
+        vboId = glGenBuffers();
+        vboIdList.add(vboId);
+        FloatBuffer textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.length);
+        textCoordsBuffer.put(0, textCoords);
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 
         // Index VBO
         vboId = glGenBuffers();

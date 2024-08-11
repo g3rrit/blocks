@@ -1,6 +1,7 @@
 package com.p34r.blocks;
 
-import org.joml.Vector2i;
+import org.joml.Matrix4f;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -8,7 +9,7 @@ public class Chunk {
     public static final int CHUNK_SIZE = 8;
 
     // position is in terms of the chunk size. I.e. 2, 0 -> 2 * 32, 0
-    private Vector2i pos;
+    private Vector3i pos;
 
     private BlockType[][][] blocks;
 
@@ -24,8 +25,10 @@ public class Chunk {
 
     private BlockMesh[] blockMeshes;
 
+    private Matrix4f modelMatrix;
+
     public Chunk(int x, int y, int z) {
-        this.pos = new Vector2i(x, y);
+        this.pos = new Vector3i(x, y, z);
         this.blocks = new BlockType[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
         for (int i = 0; i < CHUNK_SIZE; i++) {
             for (int j = 0; j < CHUNK_SIZE; j++) {
@@ -37,13 +40,16 @@ public class Chunk {
         this.neighbors = new Chunk[6];
         this.blockMeshes = new BlockMesh[6];
 
+        this.modelMatrix = new Matrix4f();
+        this.modelMatrix.translate(x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE);
+
         updateMesh();
     }
 
     private void updateMesh() {
         ArrayList<BlockGrid> blockGrids = new ArrayList<>();
 
-        int indicesOffset[] = new int[6];
+        int[] indicesOffset = new int[6];
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
@@ -58,8 +64,8 @@ public class Chunk {
                             (z - 1 < 0) ? null : blocks[x][y][z - 1],
                             (y + 1 >= CHUNK_SIZE) ? null : blocks[x][y + 1][z],
                             (y - 1 < 0) ? null : blocks[x][y - 1][z],
-                            (x - 1 < 0) ? null : blocks[x - 1][y][z],
                             (x + 1 >= CHUNK_SIZE) ? null : blocks[x + 1][y][z],
+                            (x - 1 < 0) ? null : blocks[x - 1][y][z],
                     };
 
                     BlockGrid blockGrid = new BlockGrid(blocks[x][y][z], x, y, z, indicesOffset, blockNeighbors);
@@ -70,7 +76,7 @@ public class Chunk {
 
                     for (int i = 0; i < 6; i++) {
                         // TODO: there will be always 4 vertices (* 3)
-                        indicesOffset[i] = blockGrid.verticesCount(i) / 3;
+                        indicesOffset[i] += blockGrid.verticesCount(i) / 3;
                     }
 
                     blockGrids.add(blockGrid);
@@ -82,18 +88,22 @@ public class Chunk {
 
             int verticesCount = 0;
             int indicesCount = 0;
+            int textCoordsCount = 0;
 
             for (BlockGrid blockGrid : blockGrids) {
                 verticesCount += blockGrid.verticesCount(side);
                 indicesCount += blockGrid.indicesCount(side);
+                textCoordsCount += blockGrid.textCoordsCount(side);
             }
 
             float[] vertices = new float[verticesCount];
             int[] indices = new int[indicesCount];
+            float[] textCoords = new float[textCoordsCount];
 
             {
                 int iV = 0;
                 int iI = 0;
+                int iT = 0;
                 for (BlockGrid blockGrid : blockGrids) {
                     if (blockGrid.isEmpty(side)) {
                         continue;
@@ -101,6 +111,7 @@ public class Chunk {
 
                     float[] verticesB = blockGrid.getVertices(side);
                     int[] indicesB = blockGrid.getIndices(side);
+                    float[] textCoordsB = blockGrid.getTextCoords(side);
 
                     for (float v : verticesB) {
                         vertices[iV++] = v;
@@ -108,10 +119,13 @@ public class Chunk {
                     for (int i : indicesB) {
                         indices[iI++] = i;
                     }
+                    for (float t : textCoordsB) {
+                        textCoords[iT++] = t;
+                    }
                 }
             }
 
-            this.blockMeshes[side] = new BlockMesh(vertices, indices);
+            this.blockMeshes[side] = new BlockMesh(vertices, indices, textCoords);
         }
     }
 
@@ -127,5 +141,9 @@ public class Chunk {
 
     public BlockType getBlock(int x, int y, int z) {
         return this.blocks[x][y][z];
+    }
+
+    public Matrix4f getModelMatrix() {
+        return modelMatrix;
     }
 }
