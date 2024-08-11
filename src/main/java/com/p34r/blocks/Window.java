@@ -1,7 +1,6 @@
 package com.p34r.blocks;
 
 import org.lwjgl.glfw.*;
-import org.lwjgl.system.MemoryUtil;
 
 import java.util.concurrent.Callable;
 import org.tinylog.Logger;
@@ -34,16 +33,16 @@ public class Window {
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        if (Defs.compatibilityProfile) {
+        if (Defs.COMPATIBILITY_PROFILE) {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
         } else {
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         }
 
-        if (Defs.initWindowWidth > 0 && Defs.initWindowHeight > 0) {
-            this.width = Defs.initWindowWidth;
-            this.height = Defs.initWindowHeight;
+        if (Defs.INIT_WINDOW_WIDTH > 0 && Defs.INIT_WINDOW_HEIGHT > 0) {
+            this.width = Defs.INIT_WINDOW_WIDTH;
+            this.height = Defs.INIT_WINDOW_HEIGHT;
         } else {
             glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
             GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -51,7 +50,7 @@ public class Window {
             height = vidMode.height();
         }
 
-        windowHandle = glfwCreateWindow(width, height, Defs.windowTitle, NULL, NULL);
+        windowHandle = glfwCreateWindow(width, height, Defs.WINDOW_TITLE, NULL, NULL);
         if (windowHandle == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }

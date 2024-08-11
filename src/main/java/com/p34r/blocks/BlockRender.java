@@ -1,6 +1,7 @@
 package com.p34r.blocks;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -27,7 +28,7 @@ public class BlockRender {
     public void render(Scene scene) {
         shaderProgram.bind();
 
-        //SceneLights.updateLights(scene, uniformsMap);
+        SceneLights.updateLights(scene, uniformsMap);
 
         uniformsMap.setUniform("projectionMatrix", scene.getProjection().getProjMatrix());
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
@@ -40,6 +41,7 @@ public class BlockRender {
 
         for (int side = 0; side < 6; side++) {
             for (Chunk chunk : scene.getChunks()) {
+                uniformsMap.setUniform("sideNormal", Side.getNormal(side));
                 uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
                 BlockMesh mesh = chunk.getMesh(side);
                 glBindVertexArray(mesh.getVaoId());
@@ -58,6 +60,8 @@ public class BlockRender {
         uniformsMap.createUniform("viewMatrix");
         uniformsMap.createUniform("modelMatrix");
 
-        //SceneLights.createUniforms(uniformsMap);
+        uniformsMap.createUniform("sideNormal");
+
+        SceneLights.createUniforms(uniformsMap);
     }
 }

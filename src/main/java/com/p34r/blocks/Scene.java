@@ -26,6 +26,8 @@ public class Scene {
 
         // temp
         this.chunks.add(new Chunk(0, 0, 0));
+        this.chunks.add(new Chunk(0, 0, -1));
+        this.chunks.add(new Chunk(0, 0, -2));
 
         textureCache.create("res/textures/cube.png");
         textureCache.create("res/textures/cube1.png");

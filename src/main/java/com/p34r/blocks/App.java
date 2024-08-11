@@ -156,7 +156,6 @@ public class App {
 
         LightControls lightControls = new LightControls(scene);
         scene.setGui(lightControls);
-
     }
 
     private void cleanup() {
@@ -209,12 +208,15 @@ public class App {
         }
 
 
+        boolean inputConsumed = false;
         Gui gui = scene.getGui();
         if (gui != null) {
-            gui.inputGui(scene, window);
+            inputConsumed = gui.inputGui(scene, window);
         }
 
-        input(dt);
+        if (!inputConsumed) {
+            input(dt);
+        }
     }
 
     private void draw() {
