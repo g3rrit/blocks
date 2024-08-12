@@ -8,37 +8,41 @@ import java.util.ArrayList;
 public class Chunk {
     public static final int CHUNK_SIZE = 8;
 
+    private class MeshData {
+        public float[] vertices;
+        public int[] indices;
+        public float[] textCoords;
+
+        public MeshData(float[] vertices, int[] indices, float[] textCoords) {
+            this.vertices = vertices;
+            this.indices = indices;
+            this.textCoords = textCoords;
+        }
+    }
+    private MeshData[] meshData;
+
     // position is in terms of the chunk size. I.e. 2, 0 -> 2 * 32, 0
     private Vector3i pos;
-
     private BlockType[][][] blocks;
-
-    /**
-     * 0 - front
-     * 1 - back
-     * 2 - top
-     * 3 - bottom
-     * 4 - left
-     * 5 - right
-     */
     private Chunk[] neighbors;
-
     private BlockMesh[] blockMeshes;
-
     private Matrix4f modelMatrix;
+    private Terrain terrain;
 
-    public Chunk(int x, int y, int z) {
+    public Chunk(Terrain terrain, int x, int y, int z) {
+        this.terrain = terrain;
         this.pos = new Vector3i(x, y, z);
         this.blocks = new BlockType[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
         for (int i = 0; i < CHUNK_SIZE; i++) {
             for (int j = 0; j < CHUNK_SIZE; j++) {
                 for (int n = 0; n < CHUNK_SIZE; n++) {
-                    this.blocks[i][j][n] = BlockType.DIRT;
+                    this.blocks[i][j][n] = terrain.get(x * CHUNK_SIZE + i, y * CHUNK_SIZE + j, z * CHUNK_SIZE + n);
                 }
             }
         }
         this.neighbors = new Chunk[6];
         this.blockMeshes = new BlockMesh[6];
+        this.meshData = new MeshData[6];
 
         this.modelMatrix = new Matrix4f();
         this.modelMatrix.translate(x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE);
@@ -125,18 +129,25 @@ public class Chunk {
                 }
             }
 
-            this.blockMeshes[side] = new BlockMesh(vertices, indices, textCoords);
+            this.meshData[side] = new MeshData(vertices, indices, textCoords);
         }
     }
 
     public void cleanup() {
         for (BlockMesh blockMesh : blockMeshes) {
-            blockMesh.cleanup();
+            if (blockMesh != null) {
+                blockMesh.cleanup();
+            }
         }
     }
 
     public BlockMesh getMesh(int side) {
-        return this.blockMeshes[side];
+        // lazy initialization, as this must happen in the main thread
+        if (blockMeshes[side] == null) {
+            blockMeshes[side] = new BlockMesh(meshData[side].vertices, meshData[side].indices, meshData[side].textCoords);
+        }
+
+        return blockMeshes[side];
     }
 
     public BlockType getBlock(int x, int y, int z) {
@@ -145,5 +156,9 @@ public class Chunk {
 
     public Matrix4f getModelMatrix() {
         return modelMatrix;
+    }
+
+    public Vector3i getPos() {
+        return pos;
     }
 }

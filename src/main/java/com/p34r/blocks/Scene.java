@@ -13,6 +13,9 @@ public class Scene {
     private Gui gui;
     private SceneLights sceneLights;
     private ArrayList<Chunk> chunks;
+    private Terrain terrain;
+
+    private ChunkManager chunkManager;
 
     public Scene(int width, int height) {
         this.meshMap = new HashMap<>();
@@ -22,16 +25,28 @@ public class Scene {
         this.textureCache = new TextureCache();
         this.modelMap = new HashMap<>();
         this.gui = new DebugGui(this);
+
+        this.chunkManager = new ChunkManager();
+        this.chunkManager.start();
+
+        /*
         this.chunks = new ArrayList<>();
+        this.terrain = new Terrain();
 
         // temp
-        this.chunks.add(new Chunk(0, 0, 0));
-        this.chunks.add(new Chunk(0, 0, -1));
-        this.chunks.add(new Chunk(0, 0, -2));
+        for (int x = -5; x < 5; x++) {
+            for (int y = -5; y < 5; y++) {
+                for (int z = -5; z < 5; z++) {
+                    this.chunks.add(new Chunk(terrain, x, y, z));
+                }
+            }
+        }
+        */
 
         textureCache.create("res/textures/cube.png");
         textureCache.create("res/textures/cube1.png");
         textureCache.create("res/models/cube/cube.png");
+
     }
 
     public void addMesh(String meshId, ObjMesh objMesh) {
@@ -51,7 +66,14 @@ public class Scene {
         modelMap.put(model.getId(), model);
     }
 
-    public void cleanup() {
+    public void cleanup(){
+        chunkManager.setStop();
+        try {
+            chunkManager.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         modelMap.values().forEach(Model::cleanup);
         meshMap.values().forEach(ObjMesh::cleanup);
         textureCache.cleanup();
@@ -107,7 +129,8 @@ public class Scene {
         return this.sceneLights;
     }
 
-    public ArrayList<Chunk> getChunks() {
-        return this.chunks;
+    public ChunkContainer getChunkContainer() {
+        return chunkManager.getChunkContainer();
     }
+
 }

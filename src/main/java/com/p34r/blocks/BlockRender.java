@@ -33,20 +33,23 @@ public class BlockRender {
         uniformsMap.setUniform("projectionMatrix", scene.getProjection().getProjMatrix());
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 
-
-
         glActiveTexture(GL_TEXTURE0);
         Texture ctexture = scene.getTextureCache().get("res/textures/cube.png");
         ctexture.bind();
 
+        ChunkContainer chunkContainer = scene.getChunkContainer();
+        chunkContainer.cleanupAll();
+
         for (int side = 0; side < 6; side++) {
-            for (Chunk chunk : scene.getChunks()) {
-                uniformsMap.setUniform("sideNormal", Side.getNormal(side));
+            int finalSide = side;
+            chunkContainer.forEach((chunk) -> {
+            //for (Chunk chunk : scene.getChunks()) {
+                uniformsMap.setUniform("sideNormal", Side.getNormal(finalSide));
                 uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
-                BlockMesh mesh = chunk.getMesh(side);
+                BlockMesh mesh = chunk.getMesh(finalSide);
                 glBindVertexArray(mesh.getVaoId());
                 glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
-            }
+            });
         }
 
         glBindVertexArray(0);
