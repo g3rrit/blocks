@@ -14,117 +14,6 @@ public class App {
     private Scene scene;
     private Render render;
 
-    /**
-     * Mesh:
-     *      V3D *--------* V2C
-     *         /|       /|
-     *        / |V0A   / |
-     *   V7B *--*-----*  * V1B
-     *       | /   V6A| /
-     *       |/       |/
-     *   V4C *--------* V5D
-     *
-     * Texture:
-     *     D *--------* C
-     *       |        |
-     *       |        |
-     *     A *--------* B
-     */
-    float[] positions = new float[]{
-            // V0
-            0, 0, 0,
-            // V1
-            1, 0, 0,
-            // V2
-            1, 1, 0,
-            // V3
-            0, 1, 0,
-            // V4
-            0, 0, 1,
-            // V5
-            1, 0, 1,
-            // V6
-            1, 1, 1,
-            // V7
-            0, 1, 1,
-            // V0
-            0, 0, 1,
-            // V1
-            1, 0, 1,
-            // V2
-            1, 1, 1,
-            // V3
-            0, 1, 1,
-            // V4
-            0, 0, 2,
-            // V5
-            1, 0, 2,
-            // V6
-            1, 1, 2,
-            // V7
-            0, 1, 2,
-    };
-    float[] textCoords = new float[]{
-            // A
-            0, 1,
-            // B
-            1, 1,
-            // C
-            1, 0,
-            // D
-            0, 0,
-            // C
-            1, 0,
-            // D
-            0, 0,
-            // A
-            0, 1,
-            // B
-            1, 1,
-            // A
-            0, 1,
-            // B
-            1, 1,
-            // C
-            1, 0,
-            // D
-            0, 0,
-            // C
-            1, 0,
-            // D
-            0, 0,
-            // A
-            0, 1,
-            // B
-            1, 1,
-    };
-    int[] indices = new int[]{
-            // Front face
-            7, 4, 5, 5, 6, 7,
-            // Back face
-            2, 1, 0, 0, 3, 2,
-            // Top face
-            3, 7, 6, 6, 2, 3,
-            // Bottom face
-            4, 0, 1, 1, 5, 4,
-            // Left face
-            3, 0, 4, 4, 7, 3,
-            // Right face
-            6, 5, 1, 1, 2, 6,
-            // Front face
-            7, 4, 5, 5, 6, 7,
-            // Back face
-            2, 1, 0, 0, 3, 2,
-            // Top face
-            3, 7, 6, 6, 2, 3,
-            // Bottom face
-            4, 0, 1, 1, 5, 4,
-            // Left face
-            3, 0, 4, 4, 7, 3,
-            // Right face
-            6, 5, 1, 1, 2, 6,
-    };
-
     public App() {
         this.window = new Window(() -> {
             this.resize(window.getWidth(), window.getHeight());
@@ -134,7 +23,7 @@ public class App {
         this.scene = new Scene(window.getWidth(), window.getHeight());
 
         SkyBox skyBox = new SkyBox("res/models/skybox/skybox.obj", scene.getTextureCache());
-        skyBox.getSkyBoxEntity().setScale(50);
+        skyBox.getSkyBoxEntity().setScale(500);
         skyBox.getSkyBoxEntity().updateModelMatrix();
         scene.setSkyBox(skyBox);
 
@@ -155,7 +44,9 @@ public class App {
                 new Vector3f(0, 0, -1.4f), 1.0f));
 
         LightControls lightControls = new LightControls(scene);
-        scene.setGui(lightControls);
+        //scene.setGui(lightControls);
+
+        scene.init();
     }
 
     private void cleanup() {
@@ -223,10 +114,10 @@ public class App {
     }
 
     private void run() {
-        long startFrame = 0;
+        long startTime = 0;
         long dt = 0;
         while (!window.windowShouldClose()) {
-            startFrame = System.nanoTime();
+            startTime = System.nanoTime();
 
             window.pollEvents();
 
@@ -237,7 +128,7 @@ public class App {
 
             window.update();
 
-            while ((dt = (System.nanoTime() - startFrame)) < (nanosInSecons / Config.fps)) {
+            while ((dt = (System.nanoTime() - startTime)) < (nanosInSecons / Config.fps)) {
                 try {
                     Thread.sleep(1);  // TODO: find better value here
                 } catch (Exception e) {
@@ -255,10 +146,6 @@ public class App {
     public static void main(String[] args) {
         Logger.info("Starting app");
         App app = new App();
-
-        //Mesh mesh = new Mesh(app.positions, app.textCoords, app.indices);
-        //app.scene.addMesh("quad", mesh);
-
 
         app.run();
         app.cleanup();

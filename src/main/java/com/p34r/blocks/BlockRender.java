@@ -26,6 +26,9 @@ public class BlockRender {
     }
 
     public void render(Scene scene) {
+        ChunkManager chunkManager = scene.getChunkManager();
+        chunkManager.gc();
+
         shaderProgram.bind();
 
         SceneLights.updateLights(scene, uniformsMap);
@@ -34,16 +37,12 @@ public class BlockRender {
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 
         glActiveTexture(GL_TEXTURE0);
-        Texture ctexture = scene.getTextureCache().get("res/textures/cube.png");
+        Texture ctexture = scene.getTextureCache().get("res/textures/blocks.png");
         ctexture.bind();
-
-        ChunkContainer chunkContainer = scene.getChunkContainer();
-        chunkContainer.cleanupAll();
 
         for (int side = 0; side < 6; side++) {
             int finalSide = side;
-            chunkContainer.forEach((chunk) -> {
-            //for (Chunk chunk : scene.getChunks()) {
+            chunkManager.forEach((chunk) -> {
                 uniformsMap.setUniform("sideNormal", Side.getNormal(finalSide));
                 uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
                 BlockMesh mesh = chunk.getMesh(finalSide);

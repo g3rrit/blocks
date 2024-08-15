@@ -4,11 +4,12 @@ import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.tinylog.Logger;
 
 public class ChunkContainer {
 
@@ -25,6 +26,8 @@ public class ChunkContainer {
 
     private Lock cleanupLock;
     private ArrayList<Chunk> cleanupList;
+
+    private volatile int chunkCount = 0;
 
     public ChunkContainer() {
         this.chunks = new ArrayList<>();
@@ -48,6 +51,8 @@ public class ChunkContainer {
             chunks.addAll(addList.values());
             positions.addAll(addList.keySet());
             addList.clear();
+            chunkCount = chunks.size();
+            Logger.info("[A] Chunk count: " + chunkCount);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -72,6 +77,7 @@ public class ChunkContainer {
             chunks.removeIf((chunk) -> removeList.contains(chunk.getPos()));
             positions.removeAll(removeList);
             removeList.clear();
+            Logger.info("[D] Chunk count: " + chunks.size() + " - " + positions.size());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -82,7 +88,7 @@ public class ChunkContainer {
         }
     }
 
-    // must only be called in main thread
+    /** Must be called from main thread */
     public void cleanupAll() {
         cleanupLock.lock();
         try {
@@ -93,6 +99,7 @@ public class ChunkContainer {
             for (Chunk chunk : cleanupList) {
                 chunk.cleanup();
             }
+            cleanupList.clear();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -128,15 +135,18 @@ public class ChunkContainer {
 
     public void add(Vector3i pos, Supplier<Chunk> supplier) {
         addLock.lock();
+        positionLock.lock();
         try {
-            if (addList.containsKey(pos)) {
+            if (addList.containsKey(pos) || positions.contains(pos)) {
                 return;
             }
+
             addList.put(pos, supplier.get());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             addLock.unlock();
+            positionLock.unlock();
         }
     }
 
@@ -152,6 +162,38 @@ public class ChunkContainer {
         } finally {
             removeLock.unlock();
         }
+    }
+
+    /** Must be called from main thread */
+    public void cleanup() {
+        chunkLock.lock();
+        positionLock.lock();
+        removeLock.lock();
+        cleanupLock.lock();
+        addLock.lock();
+        try {
+            chunks.forEach(Chunk::cleanup);
+            addList.values().forEach(Chunk::cleanup);
+            cleanupList.forEach(Chunk::cleanup);
+
+            chunks.clear();
+            addList.clear();
+            cleanupList.clear();
+            removeList.clear();
+            positions.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            chunkLock.unlock();
+            positionLock.unlock();
+            removeLock.unlock();
+            cleanupLock.unlock();
+            addLock.unlock();
+        }
+    }
+
+    public int getChunkCount() {
+        return chunkCount;
     }
 }
 

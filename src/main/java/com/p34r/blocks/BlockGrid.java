@@ -1,11 +1,16 @@
 package com.p34r.blocks;
 
+import org.joml.Vector2i;
 import org.lwjgl.bgfx.BGFXCacheReadSizeCallback;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class BlockGrid {
+    public static final int TEXTURE_SIZE = 64;
+    public static final int BLOCK_COUNT = 8;
+    public static final float TEXTURE_DIV = (float) BLOCK_COUNT / TEXTURE_SIZE;
+
     public class Grid {
         public boolean empty = true;
         public float[] vertices = null;
@@ -225,11 +230,12 @@ public class BlockGrid {
 
         for (side = 0; side < 6; side++) {
             if (facesActive[side]) {
+                Vector2i textCoordsOffset = blockType.getTextCoordsOffset();
                 grids[side].textCoords = new float[]{
-                    0, 1,
-                    1, 1,
-                    0, 1,
-                    0, 0,
+                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
+                        (1 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
+                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
+                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (0 + textCoordsOffset.y) * TEXTURE_DIV,
                 };
             }
         }

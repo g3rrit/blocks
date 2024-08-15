@@ -9,4 +9,6 @@ public final class Defs {
 
     public static final int INIT_WINDOW_HEIGHT = 600;
     public static final int INIT_WINDOW_WIDTH = 800;
+
+    public static final long NANOS_IN_SECONDS = 1000000000;
 }
