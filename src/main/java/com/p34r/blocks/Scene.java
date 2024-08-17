@@ -1,5 +1,7 @@
 package com.p34r.blocks;
 
+import org.joml.Vector3f;
+
 import java.util.*;
 
 public class Scene {
@@ -13,6 +15,7 @@ public class Scene {
     private Gui gui;
     private SceneLights sceneLights;
     private Terrain terrain;
+    private Fog fog;
 
     private ChunkManager chunkManager;
 
@@ -24,6 +27,7 @@ public class Scene {
         this.textureCache = new TextureCache();
         this.modelMap = new HashMap<>();
         this.gui = new DebugGui(this);
+        this.fog = new Fog(true, new Vector3f(0.2f, 0.2f, 0.3f), 0.010f);
 
         this.chunkManager = new ChunkManager(this);
 
@@ -137,4 +141,11 @@ public class Scene {
         return chunkManager;
     }
 
+    public Fog getFog() {
+        return fog;
+    }
+
+    public void setFog(Fog fog) {
+        this.fog = fog;
+    }
 }

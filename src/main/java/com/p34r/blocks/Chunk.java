@@ -23,8 +23,6 @@ public class Chunk {
 
     // position is in terms of the chunk size. I.e. 2, 0 -> 2 * 32, 0
     private Vector3i pos;
-    private BlockType[][][] blocks;
-    private Chunk[] neighbors;
     private BlockMesh[] blockMeshes;
     private Matrix4f modelMatrix;
     private Terrain terrain;
@@ -32,15 +30,6 @@ public class Chunk {
     public Chunk(Terrain terrain, int x, int y, int z) {
         this.terrain = terrain;
         this.pos = new Vector3i(x, y, z);
-        this.blocks = new BlockType[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
-        for (int i = 0; i < CHUNK_SIZE; i++) {
-            for (int j = 0; j < CHUNK_SIZE; j++) {
-                for (int n = 0; n < CHUNK_SIZE; n++) {
-                    this.blocks[i][j][n] = terrain.get(x * CHUNK_SIZE + i, y * CHUNK_SIZE + j, z * CHUNK_SIZE + n);
-                }
-            }
-        }
-        this.neighbors = new Chunk[6];
         this.blockMeshes = new BlockMesh[6];
         this.meshData = new MeshData[6];
 
@@ -58,11 +47,12 @@ public class Chunk {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++){
-                    if (blocks[x][y][z] == BlockType.AIR) {
+                    BlockType block = getBlock(x, y, z);
+                    if (block == BlockType.AIR) {
                         continue;
                     }
 
-                    // TODO: check for neighbors in other chunks
+                    /* old approach, it should be as fast querying the blocks from the terrain
                     BlockType[] blockNeighbors = new BlockType[] {
                             (z + 1 >= CHUNK_SIZE) ? null : blocks[x][y][z + 1],
                             (z - 1 < 0) ? null : blocks[x][y][z - 1],
@@ -71,8 +61,17 @@ public class Chunk {
                             (x + 1 >= CHUNK_SIZE) ? null : blocks[x + 1][y][z],
                             (x - 1 < 0) ? null : blocks[x - 1][y][z],
                     };
+                    */
+                    BlockType[] blockNeighbors = new BlockType[]{
+                        getBlock(x, y, z + 1),
+                        getBlock(x, y, z - 1),
+                        getBlock(x, y + 1, z),
+                        getBlock(x, y - 1, z),
+                        getBlock(x + 1, y, z),
+                        getBlock(x - 1, y, z),
+                    };
 
-                    BlockGrid blockGrid = new BlockGrid(blocks[x][y][z], x, y, z, indicesOffset, blockNeighbors);
+                    BlockGrid blockGrid = new BlockGrid(block, x, y, z, indicesOffset, blockNeighbors);
 
                     if (blockGrid.isEmpty()) {
                         continue;
@@ -98,6 +97,10 @@ public class Chunk {
                 verticesCount += blockGrid.verticesCount(side);
                 indicesCount += blockGrid.indicesCount(side);
                 textCoordsCount += blockGrid.textCoordsCount(side);
+            }
+
+            if (verticesCount == 0) {
+                continue;
             }
 
             float[] vertices = new float[verticesCount];
@@ -141,7 +144,15 @@ public class Chunk {
         }
     }
 
+    public boolean isSideEmpty(int side) {
+        return meshData[side] == null;
+    }
+
     public BlockMesh getMesh(int side) {
+        if (meshData[side] == null) {
+            return null;
+        }
+
         // lazy initialization, as this must happen in the main thread
         if (blockMeshes[side] == null) {
             blockMeshes[side] = new BlockMesh(meshData[side].vertices, meshData[side].indices, meshData[side].textCoords);
@@ -151,7 +162,7 @@ public class Chunk {
     }
 
     public BlockType getBlock(int x, int y, int z) {
-        return this.blocks[x][y][z];
+        return terrain.get(pos.x * CHUNK_SIZE + x, pos.y * CHUNK_SIZE + y, pos.z * CHUNK_SIZE + z);
     }
 
     public Matrix4f getModelMatrix() {

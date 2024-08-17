@@ -27,9 +27,20 @@ public class BlockRender {
 
     public void render(Scene scene) {
         ChunkManager chunkManager = scene.getChunkManager();
+
+        // TODO: do this somewhere else
         chunkManager.gc();
 
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         shaderProgram.bind();
+
+        Fog fog = scene.getFog();
+        uniformsMap.setUniform("fog.activeFog", fog.isActive() ? 1 : 0);
+        uniformsMap.setUniform("fog.color", fog.getColor());
+        uniformsMap.setUniform("fog.density", fog.getDensity());
 
         SceneLights.updateLights(scene, uniformsMap);
 
@@ -42,8 +53,13 @@ public class BlockRender {
 
         for (int side = 0; side < 6; side++) {
             int finalSide = side;
+            uniformsMap.setUniform("sideNormal", Side.getNormal(side));
+
             chunkManager.forEach((chunk) -> {
-                uniformsMap.setUniform("sideNormal", Side.getNormal(finalSide));
+                if (chunk.isSideEmpty(finalSide)) {
+                    return;
+                }
+
                 uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
                 BlockMesh mesh = chunk.getMesh(finalSide);
                 glBindVertexArray(mesh.getVaoId());
@@ -62,8 +78,14 @@ public class BlockRender {
         uniformsMap.createUniform("viewMatrix");
         uniformsMap.createUniform("modelMatrix");
 
+        uniformsMap.createUniform("fog.activeFog");
+        uniformsMap.createUniform("fog.color");
+        uniformsMap.createUniform("fog.density");
+
         uniformsMap.createUniform("sideNormal");
 
         SceneLights.createUniforms(uniformsMap);
+
+
     }
 }

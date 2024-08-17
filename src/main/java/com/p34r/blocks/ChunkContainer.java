@@ -77,7 +77,6 @@ public class ChunkContainer {
             chunks.removeIf((chunk) -> removeList.contains(chunk.getPos()));
             positions.removeAll(removeList);
             removeList.clear();
-            Logger.info("[D] Chunk count: " + chunks.size() + " - " + positions.size());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
