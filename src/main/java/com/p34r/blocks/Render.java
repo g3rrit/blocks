@@ -11,6 +11,7 @@ public class Render {
     private GuiRender guiRender;
     private SkyBoxRender skyBoxRender;
     private BlockRender blockRender;
+    private ShadowRender shadowRender;
 
     public Render(Window window) {
         GL.createCapabilities();
@@ -18,24 +19,32 @@ public class Render {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
+        // Support for transparencies
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         sceneRender = new SceneRender();
         guiRender = new GuiRender(window);
         skyBoxRender = new SkyBoxRender();
         blockRender = new BlockRender();
+        shadowRender = new ShadowRender();
     }
 
     public void cleanup() {
         sceneRender.cleanup();
         guiRender.cleanup();
         skyBoxRender.cleanup();
+        shadowRender.cleanup();
     }
 
     public void render(Window window, Scene scene) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, window.getWidth(), window.getHeight());
 
+        // TODO: something is going wrong here
+        //shadowRender.render(scene);
         skyBoxRender.render(scene);
-        blockRender.render(scene);
+        blockRender.render(scene, shadowRender);
         sceneRender.render(scene);
         guiRender.render(scene);
     }

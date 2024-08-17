@@ -6,6 +6,7 @@ layout (location=1) in vec2 textCoord;
 out vec2 outTextCoord;
 out vec3 outPosition;
 out vec3 outNormal;
+out vec4 outWorldPosition;
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -21,4 +22,5 @@ void main()
     outTextCoord = textCoord;
     outPosition = mvPosition.xyz;
     outNormal = sideNormal;
+    outWorldPosition = modelMatrix * vec4(position, 1.0);
 }

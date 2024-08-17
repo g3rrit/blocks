@@ -25,12 +25,13 @@ public class BlockRender {
         shaderProgram.cleanup();
     }
 
-    public void render(Scene scene) {
+    public void render(Scene scene, ShadowRender shadowRender) {
         ChunkManager chunkManager = scene.getChunkManager();
 
         // TODO: do this somewhere else
         chunkManager.gc();
 
+        // TODO: Maybe this can be combined with Render
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -44,8 +45,20 @@ public class BlockRender {
 
         SceneLights.updateLights(scene, uniformsMap);
 
+        uniformsMap.setUniform("txtSampler", 0);
         uniformsMap.setUniform("projectionMatrix", scene.getProjection().getProjMatrix());
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
+
+        int start = 2;
+        List<CascadeShadow> cascadeShadows = shadowRender.getCascadeShadows();
+        for (int i = 0; i < CascadeShadow.SHADOW_MAP_CASCADE_COUNT; i++) {
+            uniformsMap.setUniform("shadowMap[" + i + "]", start + i);
+            CascadeShadow cascadeShadow = cascadeShadows.get(i);
+            uniformsMap.setUniform("cascadeshadows[" + i + "]" + ".projViewMatrix", cascadeShadow.getProjViewMatrix());
+            uniformsMap.setUniform("cascadeshadows[" + i + "]" + ".splitDistance", cascadeShadow.getSplitDistance());
+        }
+
+        shadowRender.getShadowBuffer().bindTextures(GL_TEXTURE2);
 
         glActiveTexture(GL_TEXTURE0);
         Texture ctexture = scene.getTextureCache().get("res/textures/blocks.png");
@@ -77,6 +90,7 @@ public class BlockRender {
         uniformsMap.createUniform("projectionMatrix");
         uniformsMap.createUniform("viewMatrix");
         uniformsMap.createUniform("modelMatrix");
+        uniformsMap.createUniform("txtSampler");
 
         uniformsMap.createUniform("fog.activeFog");
         uniformsMap.createUniform("fog.color");
@@ -86,6 +100,11 @@ public class BlockRender {
 
         SceneLights.createUniforms(uniformsMap);
 
-
+        // shadows
+        for (int i = 0; i < CascadeShadow.SHADOW_MAP_CASCADE_COUNT; i++) {
+            uniformsMap.createUniform("shadowMap[" + i + "]");
+            uniformsMap.createUniform("cascadeshadows[" + i + "]" + ".projViewMatrix");
+            uniformsMap.createUniform("cascadeshadows[" + i + "]" + ".splitDistance");
+        }
     }
 }
