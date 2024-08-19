@@ -231,6 +231,14 @@ public class BlockGrid {
         for (side = 0; side < 6; side++) {
             if (facesActive[side]) {
                 Vector2i textCoordsOffset = blockType.getTextCoordsOffset();
+                /*
+                grids[side].textCoords = new float[]{
+                        0, 1,
+                        1, 1,
+                        0, 1,
+                        0, 0,
+                };
+                */
                 grids[side].textCoords = new float[]{
                         (0 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
                         (1 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,

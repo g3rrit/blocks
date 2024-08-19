@@ -83,14 +83,14 @@ vec4 calcLightColor(vec4 diffuse, vec4 specular, vec3 lightColor, float light_in
     diffuseColor = diffuse * vec4(lightColor, 1.0) * light_intensity * diffuseFactor;
 
     // Specular Light
-    vec3 camera_direction = normalize(-position);
-    vec3 from_light_dir = -to_light_dir;
-    vec3 reflected_light = normalize(reflect(from_light_dir, normal));
-    float specularFactor = max(dot(camera_direction, reflected_light), 0.0);
-    specularFactor = pow(specularFactor, SPECULAR_POWER);
-    specColor = specular * light_intensity  * specularFactor * material.reflectance * vec4(lightColor, 1.0);
+    //vec3 camera_direction = normalize(-position);
+    //vec3 from_light_dir = -to_light_dir;
+    //vec3 reflected_light = normalize(reflect(from_light_dir, normal));
+    //float specularFactor = max(dot(camera_direction, reflected_light), 0.0);
+    //specularFactor = pow(specularFactor, SPECULAR_POWER);
+    //specColor = specular * light_intensity  * specularFactor * material.reflectance * vec4(lightColor, 1.0);
 
-    return (diffuseColor + specColor);
+    return diffuseColor;//(diffuseColor + specColor);
 }
 
 vec4 calcPointLight(vec4 diffuse, vec4 specular, PointLight light, vec3 position, vec3 normal) {
@@ -143,8 +143,8 @@ float textureProj(vec4 shadowCoord, vec2 offset, int idx) {
 void main() {
     vec4 text_color = texture(txtSampler, outTextCoord);
     vec4 ambient = calcAmbient(ambientLight, text_color + material.ambient);
-    vec4 diffuse = text_color + material.diffuse;
-    vec4 specular = text_color + material.specular;
+    vec4 diffuse = text_color;// + material.diffuse;
+    vec4 specular = text_color;// + material.specular;
 
     vec4 diffuseSpecularComp = calcDirLight(diffuse, specular, dirLight, outPosition, outNormal);
 
@@ -158,9 +158,12 @@ void main() {
 
     for (int i=0; i<MAX_POINT_LIGHTS; i++) {
         if (pointLights[i].intensity > 0) {
-            diffuseSpecularComp += calcPointLight(diffuse, specular, pointLights[i], outPosition, outNormal);
+            //diffuseSpecularComp += calcPointLight(diffuse, specular, pointLights[i], outPosition, outNormal);
         }
     }
+
+    //fragColor = vec4(shadowFactor, 0, 0, 1);
+    //fragColor = vec4(outPosition.xyz, 1); //+ diffuseSpecularComp;
 
     fragColor = ambient + diffuseSpecularComp;
     fragColor.rgb = fragColor.rgb * shadowFactor;

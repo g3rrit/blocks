@@ -49,6 +49,10 @@ public class BlockRender {
         uniformsMap.setUniform("projectionMatrix", scene.getProjection().getProjMatrix());
         uniformsMap.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 
+        glActiveTexture(GL_TEXTURE0);
+        Texture ctexture = scene.getTextureCache().get("res/textures/blocks.png");
+        ctexture.bind();
+
         int start = 2;
         List<CascadeShadow> cascadeShadows = shadowRender.getCascadeShadows();
         for (int i = 0; i < CascadeShadow.SHADOW_MAP_CASCADE_COUNT; i++) {
@@ -60,12 +64,10 @@ public class BlockRender {
 
         shadowRender.getShadowBuffer().bindTextures(GL_TEXTURE2);
 
-        glActiveTexture(GL_TEXTURE0);
-        Texture ctexture = scene.getTextureCache().get("res/textures/blocks.png");
-        ctexture.bind();
 
         for (int side = 0; side < 6; side++) {
             int finalSide = side;
+
             uniformsMap.setUniform("sideNormal", Side.getNormal(side));
 
             chunkManager.forEach((chunk) -> {
@@ -87,6 +89,7 @@ public class BlockRender {
 
     private void createUniforms() {
         uniformsMap = new UniformsMap(shaderProgram.getProgramId());
+
         uniformsMap.createUniform("projectionMatrix");
         uniformsMap.createUniform("viewMatrix");
         uniformsMap.createUniform("modelMatrix");

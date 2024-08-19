@@ -6,7 +6,7 @@ import org.joml.Vector3i;
 import java.util.ArrayList;
 
 public class Chunk {
-    public static final int CHUNK_SIZE = 8;
+    public static final int CHUNK_SIZE = 16;
 
     private class MeshData {
         public float[] vertices;

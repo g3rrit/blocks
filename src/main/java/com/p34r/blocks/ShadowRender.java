@@ -13,6 +13,8 @@ public class ShadowRender {
     public ShadowRender() {
         List<ShaderProgram.ShaderModuleData> shaderModuleDataList = new ArrayList<>();
         shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/shadow.vs", GL_VERTEX_SHADER));
+        // test
+        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/shadow.fs", GL_FRAGMENT_SHADER));
         shaderProgram = new ShaderProgram(shaderModuleDataList);
 
         shadowBuffer = new ShadowBuffer();
@@ -54,7 +56,6 @@ public class ShadowRender {
 
         shaderProgram.bind();
 
-        Collection<Model> models = scene.getModelMap().values();
         for (int i = 0; i < CascadeShadow.SHADOW_MAP_CASCADE_COUNT; i++) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowBuffer.getDepthMapTexture().getIds()[i], 0);
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -64,6 +65,7 @@ public class ShadowRender {
 
             chunkManager.forEach((chunk) -> {
                 uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
+                // TODO: only run for the sides that are actually needed
                 for (int side = 0; side < 6; side++) {
                     if (chunk.isSideEmpty(side)) {
                         continue;
@@ -74,7 +76,6 @@ public class ShadowRender {
                     glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
                 }
             });
-
         }
 
         shaderProgram.unbind();

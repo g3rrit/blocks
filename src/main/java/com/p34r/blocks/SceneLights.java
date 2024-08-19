@@ -17,7 +17,7 @@ public class SceneLights {
     public SceneLights() {
         ambientLight = new AmbientLight();
         pointLights = new ArrayList<>();
-        dirLight = new DirLight(new Vector3f(1, 1, 1), new Vector3f(0, 1, 0), 1.0f);
+        dirLight = new DirLight(new Vector3f(1, 1, 1), new Vector3f(0.5f, 1, 0.3f), 1.0f);
     }
 
     public AmbientLight getAmbientLight() {
@@ -40,14 +40,18 @@ public class SceneLights {
         uniformsMap.setUniform("ambientLight.factor", ambientLight.getIntensity());
         uniformsMap.setUniform("ambientLight.color", ambientLight.getColor());
 
+        // TODO: fix this mess, no idea why we multiply the direction with the view matrix
+
         DirLight dirLight = sceneLights.getDirLight();
-        Vector4f auxDir = new Vector4f(dirLight.getDirection(), 0);
-        auxDir.mul(viewMatrix);
-        Vector3f dir = new Vector3f(auxDir.x, auxDir.y, auxDir.z);
+        //Vector4f auxDir = new Vector4f(dirLight.getDirection(), 0);
+        //auxDir.mul(viewMatrix);
+        //Vector3f dir = new Vector3f(auxDir.x, auxDir.y, auxDir.z);
         uniformsMap.setUniform("dirLight.color", dirLight.getColor());
-        uniformsMap.setUniform("dirLight.direction", dir);
+        //uniformsMap.setUniform("dirLight.direction", dir);
+        uniformsMap.setUniform("dirLight.direction", dirLight.getDirection());
         uniformsMap.setUniform("dirLight.intensity", dirLight.getIntensity());
 
+        /*
         List<PointLight> pointLights = sceneLights.getPointLights();
         int numPointLights = pointLights.size();
         PointLight pointLight;
@@ -60,6 +64,7 @@ public class SceneLights {
             String name = "pointLights[" + i + "]";
             updatePointLight(pointLight, name, viewMatrix, uniformsMap);
         }
+        */
     }
 
     public static void updatePointLight(PointLight pointLight, String prefix, Matrix4f viewMatrix, UniformsMap uniformsMap) {

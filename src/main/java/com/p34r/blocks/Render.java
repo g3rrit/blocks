@@ -2,7 +2,7 @@ package com.p34r.blocks;
 
 import org.lwjgl.opengl.GL;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 
 public class Render {
 
@@ -18,6 +18,9 @@ public class Render {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
+        //glEnable(GL_MULTISAMPLE);
+        //glEnable(GL_DEPTH_TEST);
 
         // Support for transparencies
         glEnable(GL_BLEND);
@@ -38,15 +41,15 @@ public class Render {
     }
 
     public void render(Window window, Scene scene) {
+        shadowRender.render(scene);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, window.getWidth(), window.getHeight());
 
-        // TODO: something is going wrong here
-        //shadowRender.render(scene);
         skyBoxRender.render(scene);
         blockRender.render(scene, shadowRender);
-        sceneRender.render(scene);
-        guiRender.render(scene);
+        //sceneRender.render(scene);
+        //guiRender.render(scene);
     }
 
     public void resize(int width, int height) {

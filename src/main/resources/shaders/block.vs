@@ -13,7 +13,6 @@ uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 uniform vec3 sideNormal;
 
-
 void main()
 {
     mat4 modelViewMatrix = viewMatrix * modelMatrix;
