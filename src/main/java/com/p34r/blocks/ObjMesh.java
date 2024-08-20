@@ -14,7 +14,7 @@ public class ObjMesh implements Mesh {
     private int vaoId;
     private List<Integer> vboIdList;
 
-    public ObjMesh(float[] positions, float[] normals, float[] textCoords, int[] indices) {
+    public ObjMesh(float[] positions, float[] normals, float[] texCoords, int[] indices) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             numVertices = indices.length;
             vboIdList = new ArrayList<>();
@@ -45,10 +45,10 @@ public class ObjMesh implements Mesh {
             // Texture coordinates VBO
             vboId = glGenBuffers();
             vboIdList.add(vboId);
-            FloatBuffer textCoordsBuffer = stack.callocFloat(textCoords.length);
-            textCoordsBuffer.put(0, textCoords);
+            FloatBuffer texCoordsBuffer = stack.callocFloat(texCoords.length);
+            texCoordsBuffer.put(0, texCoords);
             glBindBuffer(GL_ARRAY_BUFFER, vboId);
-            glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL_STATIC_DRAW);
             glEnableVertexAttribArray(2);
             glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0);
 

@@ -14,7 +14,7 @@ public class BlockMesh implements Mesh {
     private int vaoId;
     private List<Integer> vboIdList;
 
-    public BlockMesh(float[] positions, int[] indices, float[] textCoords) {
+    public BlockMesh(float[] positions, int[] indices, float[] texCoords, int[] blockTypes) {
         numVertices = indices.length;
         vboIdList = new ArrayList<>();
 
@@ -34,10 +34,10 @@ public class BlockMesh implements Mesh {
         // Texture coordinates VBO
         vboId = glGenBuffers();
         vboIdList.add(vboId);
-        FloatBuffer textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.length);
-        textCoordsBuffer.put(0, textCoords);
+        FloatBuffer texCoordsBuffer = MemoryUtil.memAllocFloat(texCoords.length);
+        texCoordsBuffer.put(0, texCoords);
         glBindBuffer(GL_ARRAY_BUFFER, vboId);
-        glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, texCoordsBuffer, GL_STATIC_DRAW);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 
@@ -49,11 +49,24 @@ public class BlockMesh implements Mesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
+        // Block type VBO
+        vboId = glGenBuffers();
+        vboIdList.add(vboId);
+        IntBuffer blockTypesBuffer = MemoryUtil.memAllocInt(blockTypes.length);
+        blockTypesBuffer.put(0, blockTypes);
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        glBufferData(GL_ARRAY_BUFFER, blockTypesBuffer, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(2);
+        glVertexAttribIPointer(2, 1, GL_INT, 0, 0);
+
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
         MemoryUtil.memFree(positionsBuffer);
         MemoryUtil.memFree(indicesBuffer);
+        MemoryUtil.memFree(texCoordsBuffer);
+        MemoryUtil.memFree(blockTypesBuffer);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.p34r.blocks;
 import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
+import static org.lwjgl.opengl.GL14.glBlendEquation;
 
 public class Render {
 
@@ -18,12 +20,11 @@ public class Render {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-
         //glEnable(GL_MULTISAMPLE);
-        //glEnable(GL_DEPTH_TEST);
 
         // Support for transparencies
         glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         sceneRender = new SceneRender();

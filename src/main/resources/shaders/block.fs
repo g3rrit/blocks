@@ -13,6 +13,7 @@ in vec3 outPosition;
 in vec3 outNormal;
 in vec2 outTextCoord;
 in vec4 outWorldPosition;
+flat in int outBlockType;
 
 out vec4 fragColor;
 
@@ -172,6 +173,11 @@ void main() {
         fragColor = calcFog(outPosition, fragColor, fog, ambientLight.color, dirLight);
     }
 
+    if (outBlockType == 3) {
+        fragColor.a = 0.0;
+    }
+
+    // DEBUG
     if (DEBUG_SHADOWS == 1) {
         switch (cascadeIndex) {
             case 0:

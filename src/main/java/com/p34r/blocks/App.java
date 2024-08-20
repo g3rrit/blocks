@@ -90,20 +90,27 @@ public class App {
         }
     }
 
+    private long updateCount = 0;
     private void update(double dt) {
         fpsCount++;
+        updateCount++;
         if ((System.nanoTime() - startFps) > nanosInSecons) {
             DebugState.fps = fpsCount;
             fpsCount = 0;
             startFps = System.nanoTime();
         }
 
+        if (updateCount % 50 == 0) {
+            Logger.info("FPS: " + DebugState.fps);
+        }
+
 
         boolean inputConsumed = false;
         Gui gui = scene.getGui();
-        if (gui != null) {
-            inputConsumed = gui.inputGui(scene, window);
-        }
+        //if (gui != null) {
+        //    inputConsumed = gui.inputGui(scene, window);
+        //}
+        gui.inputGui(scene, window);
 
         if (!inputConsumed) {
             input(dt);

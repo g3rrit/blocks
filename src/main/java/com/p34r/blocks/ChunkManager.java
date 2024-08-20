@@ -18,9 +18,9 @@ public class ChunkManager extends Thread {
     private static final double REMOVE_CHUNK_TIMEOUT = 0.3;
 
     //private static final double CHUNK_REMOVE_DISTANCE = 10;
-    private static final int CHUNK_ADD_COUNT = 400;
-    private static final int MAX_CHUNK_COUNT = 4000;
-    private static final int MAX_CHUNK_COUNT_BUFFER = 1000;
+    private static final int CHUNK_ADD_COUNT = 100;
+    private static final int MAX_CHUNK_COUNT = 1000;
+    private static final int MAX_CHUNK_COUNT_BUFFER = 400;
 
     private Terrain terrain;
     private ChunkContainer chunkContainer;

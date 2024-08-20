@@ -11,12 +11,14 @@ public class Chunk {
     private class MeshData {
         public float[] vertices;
         public int[] indices;
-        public float[] textCoords;
+        public float[] texCoords;
+        public int[] blockTypes;
 
-        public MeshData(float[] vertices, int[] indices, float[] textCoords) {
+        public MeshData(float[] vertices, int[] indices, float[] texCoords, int[] blockTypes) {
             this.vertices = vertices;
             this.indices = indices;
-            this.textCoords = textCoords;
+            this.texCoords = texCoords;
+            this.blockTypes = blockTypes;
         }
     }
     private MeshData[] meshData;
@@ -91,12 +93,12 @@ public class Chunk {
 
             int verticesCount = 0;
             int indicesCount = 0;
-            int textCoordsCount = 0;
+            int texCoordsCount = 0;
 
             for (BlockGrid blockGrid : blockGrids) {
                 verticesCount += blockGrid.verticesCount(side);
                 indicesCount += blockGrid.indicesCount(side);
-                textCoordsCount += blockGrid.textCoordsCount(side);
+                texCoordsCount += blockGrid.texCoordsCount(side);
             }
 
             if (verticesCount == 0) {
@@ -105,12 +107,14 @@ public class Chunk {
 
             float[] vertices = new float[verticesCount];
             int[] indices = new int[indicesCount];
-            float[] textCoords = new float[textCoordsCount];
+            float[] texCoords = new float[texCoordsCount];
+            int[] blockTypes = new int[verticesCount / 3];
 
             {
                 int iV = 0;
                 int iI = 0;
                 int iT = 0;
+                int iB = 0;
                 for (BlockGrid blockGrid : blockGrids) {
                     if (blockGrid.isEmpty(side)) {
                         continue;
@@ -118,7 +122,7 @@ public class Chunk {
 
                     float[] verticesB = blockGrid.getVertices(side);
                     int[] indicesB = blockGrid.getIndices(side);
-                    float[] textCoordsB = blockGrid.getTextCoords(side);
+                    float[] texCoordsB = blockGrid.getTexCoords(side);
 
                     for (float v : verticesB) {
                         vertices[iV++] = v;
@@ -126,13 +130,17 @@ public class Chunk {
                     for (int i : indicesB) {
                         indices[iI++] = i;
                     }
-                    for (float t : textCoordsB) {
-                        textCoords[iT++] = t;
+                    for (float t : texCoordsB) {
+                        texCoords[iT++] = t;
+                    }
+
+                    for (int i = 0; i < 4; i++) {
+                        blockTypes[iB++] = blockGrid.getBlockType().getIdx();
                     }
                 }
             }
 
-            this.meshData[side] = new MeshData(vertices, indices, textCoords);
+            this.meshData[side] = new MeshData(vertices, indices, texCoords, blockTypes);
         }
     }
 
@@ -148,6 +156,15 @@ public class Chunk {
         return meshData[side] == null;
     }
 
+    public boolean isEmpty() {
+        for (int i = 0; i < 6; i++) {
+            if (!isSideEmpty(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public BlockMesh getMesh(int side) {
         if (meshData[side] == null) {
             return null;
@@ -155,7 +172,7 @@ public class Chunk {
 
         // lazy initialization, as this must happen in the main thread
         if (blockMeshes[side] == null) {
-            blockMeshes[side] = new BlockMesh(meshData[side].vertices, meshData[side].indices, meshData[side].textCoords);
+            blockMeshes[side] = new BlockMesh(meshData[side].vertices, meshData[side].indices, meshData[side].texCoords, meshData[side].blockTypes);
         }
 
         return blockMeshes[side];

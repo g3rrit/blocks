@@ -15,52 +15,8 @@ public class BlockGrid {
         public boolean empty = true;
         public float[] vertices = null;
         public int[] indices = null;
-        public float[] textCoords = null;
+        public float[] texCoords = null;
     }
-
-    /**
-     * Mesh:
-     *      V3  *--------* V2
-     *         /|       /|
-     *        / |V0    / |
-     *   V7  *--*-----*  * V1
-     *       | /   V6 | /
-     *       |/       |/
-     *   V4  *--------* V5
-     */
-    private static final float[] verticesNorm = new float[]{
-            // V0
-            0, 0, 0,
-            // V1
-            1, 0, 0,
-            // V2
-            1, 1, 0,
-            // V3
-            0, 1, 0,
-            // V4
-            0, 0, 1,
-            // V5
-            1, 0, 1,
-            // V6
-            1, 1, 1,
-            // V7
-            0, 1, 1,
-    };
-
-    private static final int[] indicesNorm = new int[]{
-            // Front face
-            7, 4, 5, 5, 6, 7,
-            // Back face
-            2, 1, 0, 0, 3, 2,
-            // Top face
-            3, 7, 6, 6, 2, 3,
-            // Bottom face
-            4, 0, 1, 1, 5, 4,
-            // Left face
-            3, 0, 4, 4, 7, 3,
-            // Right face
-            6, 5, 1, 1, 2, 6,
-    };
 
     private BlockType blockType;
 
@@ -96,12 +52,32 @@ public class BlockGrid {
 
         // calculate active faces
         for (int face = 0; face < 6; face++) {
-            if (neighbors[face] == null || neighbors[face] == BlockType.AIR) {
+            BlockType neighbor =neighbors[face];
+
+            if (neighbor == null || neighbor == BlockType.AIR) {
                 facesActive[face] = true;
                 activeFaces++;
-            } else {
-                facesActive[face] = false;
+                continue;
             }
+
+            if (neighbor == blockType) {
+                facesActive[face] = false;
+                continue;
+            }
+
+            if (blockType.isTransparent()) {
+                // for now don't render any vertices, underwater we just apply a filter
+                facesActive[face] = false;
+                continue;
+            }
+            
+            if (neighbor.isTransparent()) {
+                facesActive[face] = true;
+                activeFaces++;
+                continue;
+            }
+
+            facesActive[face] = false;
         }
 
         if (activeFaces == 0) {
@@ -230,20 +206,20 @@ public class BlockGrid {
 
         for (side = 0; side < 6; side++) {
             if (facesActive[side]) {
-                Vector2i textCoordsOffset = blockType.getTextCoordsOffset();
+                Vector2i texCoordsOffset = blockType.getTexCoordsOffset();
                 /*
-                grids[side].textCoords = new float[]{
+                grids[side].texCoords = new float[]{
                         0, 1,
                         1, 1,
                         0, 1,
                         0, 0,
                 };
                 */
-                grids[side].textCoords = new float[]{
-                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
-                        (1 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
-                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (1 + textCoordsOffset.y) * TEXTURE_DIV,
-                        (0 + textCoordsOffset.x) * TEXTURE_DIV, (0 + textCoordsOffset.y) * TEXTURE_DIV,
+                grids[side].texCoords = new float[]{
+                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
+                        (1 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
+                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
+                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (0 + texCoordsOffset.y) * TEXTURE_DIV,
                 };
             }
         }
@@ -274,12 +250,12 @@ public class BlockGrid {
         return grids[side].indices.length;
     }
 
-    public int textCoordsCount(int side) {
+    public int texCoordsCount(int side) {
         if (grids[side].empty) {
             return 0;
         }
 
-        return grids[side].textCoords.length;
+        return grids[side].texCoords.length;
     }
 
     public float[] getVertices(int side) {
@@ -290,8 +266,8 @@ public class BlockGrid {
         return grids[side].indices;
     }
 
-    public float[] getTextCoords(int side) {
-        return grids[side].textCoords;
+    public float[] getTexCoords(int side) {
+        return grids[side].texCoords;
     }
 
     public BlockType getBlockType() {

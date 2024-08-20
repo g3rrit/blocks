@@ -29,12 +29,8 @@ public class BlockRender {
         ChunkManager chunkManager = scene.getChunkManager();
 
         // TODO: do this somewhere else
+        // TODO: also rename it to update or something
         chunkManager.gc();
-
-        // TODO: Maybe this can be combined with Render
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         shaderProgram.bind();
 

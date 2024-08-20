@@ -37,6 +37,10 @@ public class Terrain {
         density -= (double)y / 20;
 
         if (density <= 0) {
+            if (y < - 10) {
+                return BlockType.WATER;
+            }
+
             return BlockType.AIR;
         }
 

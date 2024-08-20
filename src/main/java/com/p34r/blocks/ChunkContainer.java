@@ -48,11 +48,15 @@ public class ChunkContainer {
         positionLock.lock();
         addLock.lock();
         try {
-            chunks.addAll(addList.values());
+            if (addList.isEmpty()) {
+                return;
+            }
+            //chunks.addAll(addList.values());
+            chunks.addAll(addList.values().stream().filter((c) -> !c.isEmpty()).toList());
             positions.addAll(addList.keySet());
             addList.clear();
-            chunkCount = chunks.size();
-            Logger.info("[A] Chunk count: " + chunkCount);
+            chunkCount = positions.size();
+            Logger.info("[A] Chunk count: " + chunks.size() + " - " + positions.size());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -68,6 +72,10 @@ public class ChunkContainer {
         removeLock.lock();
         cleanupLock.lock();
         try {
+            if (removeList.isEmpty()) {
+                return;
+            }
+
             for (Chunk chunk: chunks) {
                 if (removeList.contains(chunk.getPos())) {
                     // add logging
