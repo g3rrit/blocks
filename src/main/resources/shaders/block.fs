@@ -174,7 +174,7 @@ void main() {
     }
 
     if (outBlockType == 3) {
-        fragColor.a = 0.0;
+        fragColor.a = 0.7;
     }
 
     // DEBUG

@@ -2,7 +2,7 @@ package com.p34r.blocks;
 
 import org.joml.Vector3f;
 
-public class Side {
+public class Side<E> {
     public static final int FRONT = 0;
     public static final int BACK = 1;
     public static final int TOP = 2;
@@ -21,5 +21,18 @@ public class Side {
 
     public static Vector3f getNormal(int side) {
         return normals[side];
+    }
+
+    private E[] elems;
+    public Side() {
+        this.elems = (E[])new Object[6];
+    }
+
+    public E get(int i) {
+        return elems[i];
+    }
+
+    public void set(int i, E e) {
+        elems[i] = e;
     }
 }

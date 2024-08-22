@@ -13,6 +13,7 @@ public class Render {
     private GuiRender guiRender;
     private SkyBoxRender skyBoxRender;
     private BlockRender blockRender;
+    private WaterRender waterRender;
     private ShadowRender shadowRender;
 
     public Render(Window window) {
@@ -32,6 +33,7 @@ public class Render {
         skyBoxRender = new SkyBoxRender();
         blockRender = new BlockRender();
         shadowRender = new ShadowRender();
+        waterRender = new WaterRender();
     }
 
     public void cleanup() {
@@ -39,6 +41,7 @@ public class Render {
         guiRender.cleanup();
         skyBoxRender.cleanup();
         shadowRender.cleanup();
+        waterRender.cleanup();
     }
 
     public void render(Window window, Scene scene) {
@@ -49,6 +52,7 @@ public class Render {
 
         skyBoxRender.render(scene);
         blockRender.render(scene, shadowRender);
+        waterRender.render(scene, shadowRender);
         //sceneRender.render(scene);
         //guiRender.render(scene);
     }

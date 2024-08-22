@@ -4,6 +4,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class Chunk {
     public static final int CHUNK_SIZE = 16;
@@ -21,27 +23,39 @@ public class Chunk {
             this.blockTypes = blockTypes;
         }
     }
-    private MeshData[] meshData;
+    private Map<BlockMaterial, Side<MeshData>> meshData;
 
     // position is in terms of the chunk size. I.e. 2, 0 -> 2 * 32, 0
     private Vector3i pos;
-    private BlockMesh[] blockMeshes;
+    private Map<BlockMaterial, Side<BlockMesh>> blockMeshes;
     private Matrix4f modelMatrix;
     private Terrain terrain;
 
     public Chunk(Terrain terrain, int x, int y, int z) {
         this.terrain = terrain;
         this.pos = new Vector3i(x, y, z);
-        this.blockMeshes = new BlockMesh[6];
-        this.meshData = new MeshData[6];
+        this.blockMeshes = new EnumMap<>(BlockMaterial.class);
+        this.meshData = new EnumMap<>(BlockMaterial.class);
 
         this.modelMatrix = new Matrix4f();
         this.modelMatrix.translate(x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE);
 
-        updateMesh();
+        updateMesh(BlockMaterial.SOLID);
+        updateMesh(BlockMaterial.WATER);
     }
 
-    private void updateMesh() {
+    /**
+     * This method must either be called by the constructor (in any thread)
+     * or by the main thread
+     */
+    private void updateMesh(BlockMaterial blockMaterial) {
+        if (!meshData.containsKey(blockMaterial)) {
+            meshData.put(blockMaterial, new Side<>());
+            blockMeshes.put(blockMaterial, new Side<>());
+        }
+        Side<MeshData> meshDataSides = meshData.get(blockMaterial);
+        Side<BlockMesh> blockMeshSides = blockMeshes.get(blockMaterial);
+
         ArrayList<BlockGrid> blockGrids = new ArrayList<>();
 
         int[] indicesOffset = new int[6];
@@ -50,7 +64,7 @@ public class Chunk {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++){
                     BlockType block = getBlock(x, y, z);
-                    if (block == BlockType.AIR) {
+                    if (block.getBlockMaterial() != blockMaterial) {
                         continue;
                     }
 
@@ -140,42 +154,66 @@ public class Chunk {
                 }
             }
 
-            this.meshData[side] = new MeshData(vertices, indices, texCoords, blockTypes);
+            // This cleanup must only happen in the main thread
+            BlockMesh blockMesh = blockMeshSides.get(side);
+            if (blockMesh != null) {
+                blockMesh.cleanup();
+                blockMeshSides.set(side, null);
+            }
+
+            meshDataSides.set(side, new MeshData(vertices, indices, texCoords, blockTypes));
         }
     }
 
     public void cleanup() {
-        for (BlockMesh blockMesh : blockMeshes) {
-            if (blockMesh != null) {
-                blockMesh.cleanup();
+        for (Side<BlockMesh> blockMeshSides: blockMeshes.values()) {
+            for (int i = 0; i < 6; i++) {
+                BlockMesh blockMesh = blockMeshSides.get(i);
+                if (blockMesh != null) {
+                    blockMesh.cleanup();
+                }
             }
         }
     }
 
-    public boolean isSideEmpty(int side) {
-        return meshData[side] == null;
+    public boolean isSideEmpty(BlockMaterial blockMaterial, int side) {
+        Side<MeshData> meshDataSides = meshData.get(blockMaterial);
+        if (meshDataSides == null) {
+            return true;
+        }
+        return meshDataSides.get(side) == null;
     }
 
     public boolean isEmpty() {
         for (int i = 0; i < 6; i++) {
-            if (!isSideEmpty(i)) {
-                return false;
+            for (BlockMaterial blockMaterial: BlockMaterial.values()) {
+                if (!isSideEmpty(blockMaterial, i)) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-    public BlockMesh getMesh(int side) {
-        if (meshData[side] == null) {
+    public BlockMesh getMesh(BlockMaterial blockMaterial, int side) {
+        if (!meshData.containsKey(blockMaterial)) {
             return null;
         }
 
-        // lazy initialization, as this must happen in the main thread
-        if (blockMeshes[side] == null) {
-            blockMeshes[side] = new BlockMesh(meshData[side].vertices, meshData[side].indices, meshData[side].texCoords, meshData[side].blockTypes);
+        MeshData mesh = meshData.get(blockMaterial).get(side);
+
+        if (mesh == null) {
+            return null;
         }
 
-        return blockMeshes[side];
+        Side<BlockMesh> blockMeshSides = blockMeshes.get(blockMaterial);
+
+        // lazy initialization, as this must happen in the main thread
+        if (blockMeshSides.get(side) == null) {
+            blockMeshSides.set(side, new BlockMesh(mesh.vertices, mesh.indices, mesh.texCoords, mesh.blockTypes));
+        }
+
+        return blockMeshSides.get(side);
     }
 
     public BlockType getBlock(int x, int y, int z) {

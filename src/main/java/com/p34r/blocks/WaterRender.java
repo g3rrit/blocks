@@ -1,15 +1,24 @@
 package com.p34r.blocks;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
-public class BlockRender {
+// TODO: clean this up. I.e. make it simpler
+
+public class WaterRender {
 
     private ShaderProgram shaderProgram;
     private UniformsMap uniformsMap;
 
-    public BlockRender() {
+    public WaterRender() {
         List<ShaderProgram.ShaderModuleData> shaderModuleDataList = new ArrayList<>();
         shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.vs", GL_VERTEX_SHADER));
         shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.fs", GL_FRAGMENT_SHADER));
@@ -24,10 +33,6 @@ public class BlockRender {
 
     public void render(Scene scene, ShadowRender shadowRender) {
         ChunkManager chunkManager = scene.getChunkManager();
-
-        // TODO: do this somewhere else
-        // TODO: also rename it to update or something
-        chunkManager.gc();
 
         shaderProgram.bind();
 
@@ -64,12 +69,12 @@ public class BlockRender {
 
             try (ChunkContainer chunkContainer = chunkManager.getChunkContainer()) {
                 for (Chunk chunk: chunkContainer.getAll()) {
-                    if (chunk.isSideEmpty(BlockMaterial.SOLID, side)) {
+                    if (chunk.isSideEmpty(BlockMaterial.WATER, side)) {
                         continue;
                     }
 
                     uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
-                    BlockMesh mesh = chunk.getMesh(BlockMaterial.SOLID, side);
+                    BlockMesh mesh = chunk.getMesh(BlockMaterial.WATER, side);
                     glBindVertexArray(mesh.getVaoId());
                     glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
                 }

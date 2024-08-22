@@ -1,6 +1,5 @@
 package com.p34r.blocks;
 
-import org.joml.Math;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.tinylog.Logger;
@@ -23,14 +22,14 @@ public class ChunkManager extends Thread {
     private static final int MAX_CHUNK_COUNT_BUFFER = 400;
 
     private Terrain terrain;
-    private ChunkContainer chunkContainer;
+    private ChunkContainerManager chunkContainerManager;
 
     private volatile boolean running = true;
 
     private Scene scene;
 
     public ChunkManager(Scene scene) {
-        this.chunkContainer = new ChunkContainer();
+        this.chunkContainerManager = new ChunkContainerManager();
         this.terrain = new Terrain();
         this.scene = scene;
     }
@@ -52,12 +51,12 @@ public class ChunkManager extends Thread {
             startTime = System.nanoTime();
 
             if ((addTimeout -= dtf) <= 0) {
-                chunkContainer.addAll();
+                chunkContainerManager.addAll();
                 addTimeout = ADD_TIMEOUT;
             }
 
             if ((removeTimeout -= dtf) <= 0) {
-                chunkContainer.removeAll();
+                chunkContainerManager.removeAll();
                 removeTimeout = REMOVE_TIMEOUT;
             }
 
@@ -82,12 +81,12 @@ public class ChunkManager extends Thread {
         }
     }
 
-    public void forEach(Consumer<Chunk> consumer) {
+    public ChunkContainer getChunkContainer() {
         if (!running) {
-            return;
+            throw new RuntimeException("Not running");
         }
 
-        chunkContainer.forEach(consumer);
+        return chunkContainerManager.getChunkContainer();
     }
 
     public void gc() {
@@ -95,7 +94,7 @@ public class ChunkManager extends Thread {
             return;
         }
 
-        chunkContainer.cleanupAll();
+        chunkContainerManager.cleanupAll();
     }
 
     public void exit() {
@@ -106,11 +105,11 @@ public class ChunkManager extends Thread {
         if (running) {
             throw new RuntimeException("Can't cleanup ChunkManager while running");
         }
-        chunkContainer.cleanup();
+        chunkContainerManager.cleanup();
     }
 
     private void removeChunk() {
-        int chunkCount = chunkContainer.getChunkCount();
+        int chunkCount = chunkContainerManager.getChunkCount();
         if (chunkCount <= MAX_CHUNK_COUNT + MAX_CHUNK_COUNT_BUFFER) {
             return;
         }
@@ -122,7 +121,7 @@ public class ChunkManager extends Thread {
         ArrayList<Vector3i> removeList = new ArrayList<>();
 
         // TODO: this can be optimized
-        chunkContainer.forEachPosition((chunkPos) -> {
+        chunkContainerManager.forEachPosition((chunkPos) -> {
             if (removeList.size() < MAX_CHUNK_COUNT_BUFFER / 2) {
                 removeList.add(chunkPos);
                 removeList.sort(Comparator.comparingDouble(pos::distance));
@@ -140,7 +139,7 @@ public class ChunkManager extends Thread {
 
         for (Vector3i chunkPos: removeList) {
             Logger.info("Removing chunk: " + chunkPos);
-            chunkContainer.remove(chunkPos);
+            chunkContainerManager.remove(chunkPos);
         }
     }
 
@@ -189,13 +188,13 @@ public class ChunkManager extends Thread {
             y = MIN_Y;
         }
 
-        chunkContainer.forEachPosition(allPositions::remove);
+        chunkContainerManager.forEachPosition(allPositions::remove);
 
         int add_count = 0;
         for (Vector3i aPos: allPositions) {
             //Logger.info("Adding chunk: " + aPos);
 
-            chunkContainer.add(aPos, () -> {
+            chunkContainerManager.add(aPos, () -> {
                 return new Chunk(terrain, aPos.x, aPos.y, aPos.z);
             });
             add_count++;

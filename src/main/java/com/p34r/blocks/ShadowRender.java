@@ -63,19 +63,23 @@ public class ShadowRender {
             CascadeShadow shadowCascade = cascadeShadows.get(i);
             uniformsMap.setUniform("projViewMatrix", shadowCascade.getProjViewMatrix());
 
-            chunkManager.forEach((chunk) -> {
-                uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
-                // TODO: only run for the sides that are actually needed
-                for (int side = 0; side < 6; side++) {
-                    if (chunk.isSideEmpty(side)) {
-                        continue;
-                    }
+            try (ChunkContainer chunkContainer = chunkManager.getChunkContainer()) {
+                for (Chunk chunk: chunkContainer.getAll()) {
+                    uniformsMap.setUniform("modelMatrix", chunk.getModelMatrix());
+                    // TODO: only run for the sides that are actually needed
+                    for (int side = 0; side < 6; side++) {
+                        if (chunk.isSideEmpty(BlockMaterial.SOLID, side)) {
+                            continue;
+                        }
 
-                    BlockMesh mesh = chunk.getMesh(side);
-                    glBindVertexArray(mesh.getVaoId());
-                    glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
+                        BlockMesh mesh = chunk.getMesh(BlockMaterial.SOLID, side);
+                        glBindVertexArray(mesh.getVaoId());
+                        glDrawElements(GL_TRIANGLES, mesh.getNumVertices(), GL_UNSIGNED_INT, 0);
+                    }
                 }
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         shaderProgram.unbind();
