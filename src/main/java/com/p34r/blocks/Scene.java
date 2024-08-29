@@ -4,6 +4,8 @@ import org.joml.Vector3f;
 
 import java.util.*;
 
+// TODO: Rename to Game
+
 public class Scene {
 
     private Map<String, ObjMesh> meshMap;
@@ -16,6 +18,7 @@ public class Scene {
     private SceneLights sceneLights;
     private Terrain terrain;
     private Fog fog;
+    private double time;
 
     private ChunkManager chunkManager;
 
@@ -28,22 +31,9 @@ public class Scene {
         this.modelMap = new HashMap<>();
         this.gui = new DebugGui(this);
         this.fog = new Fog(true, new Vector3f(0.2f, 0.2f, 0.3f), 0.010f);
+        this.time = 0;
 
         this.chunkManager = new ChunkManager(this);
-
-        /*
-        this.chunks = new ArrayList<>();
-        this.terrain = new Terrain();
-
-        // temp
-        for (int x = -5; x < 5; x++) {
-            for (int y = -5; y < 5; y++) {
-                for (int z = -5; z < 5; z++) {
-                    this.chunks.add(new Chunk(terrain, x, y, z));
-                }
-            }
-        }
-        */
 
         textureCache.create("res/textures/cube.png");
         textureCache.create("res/textures/cube1.png");
@@ -54,6 +44,16 @@ public class Scene {
 
     public void init() {
         this.chunkManager.start();
+    }
+
+    public void update(double dt) {
+        time += dt;
+
+        // update dirlight
+        float ny = (float)Math.sin(time);
+        float nz = (float)Math.cos(time);
+        sceneLights.getDirLight().setDirection(new Vector3f(0.3f, ny, nz));
+
     }
 
     public void addMesh(String meshId, ObjMesh objMesh) {
@@ -147,5 +147,9 @@ public class Scene {
 
     public void setFog(Fog fog) {
         this.fog = fog;
+    }
+
+    public double getTime() {
+        return time;
     }
 }

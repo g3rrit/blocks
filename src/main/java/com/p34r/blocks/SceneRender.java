@@ -7,6 +7,8 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL30.*;
 
+// TODO: rename to ObjectRender
+
 public class SceneRender {
 
     private static final int MAX_POINT_LIGHTS = 5;

@@ -115,6 +115,8 @@ public class App {
         if (!inputConsumed) {
             input(dt);
         }
+
+        scene.update(dt);
     }
 
     private void draw() {
@@ -128,7 +130,7 @@ public class App {
 
             window.pollEvents();
 
-            update((double) dt / 1000);
+            update((double) dt / Defs.NANOS_IN_SECONDS);
             dt = 0;
 
             render.render(window, scene);

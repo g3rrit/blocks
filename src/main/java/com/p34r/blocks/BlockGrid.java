@@ -54,6 +54,11 @@ public class BlockGrid {
         for (int face = 0; face < 6; face++) {
             BlockType neighbor =neighbors[face];
 
+            if (face != Side.TOP && blockType == BlockType.WATER) {
+                facesActive[face] = false;
+                continue;
+            }
+
             if (neighbor == null || neighbor == BlockType.AIR) {
                 facesActive[face] = true;
                 activeFaces++;

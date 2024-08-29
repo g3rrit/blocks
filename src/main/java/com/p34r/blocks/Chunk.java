@@ -105,6 +105,10 @@ public class Chunk {
 
         for (int side = 0; side < 6; side++) {
 
+            if (blockMaterial == BlockMaterial.WATER && side != Side.TOP) {
+                continue;
+            }
+
             int verticesCount = 0;
             int indicesCount = 0;
             int texCoordsCount = 0;

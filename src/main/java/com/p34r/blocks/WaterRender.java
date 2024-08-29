@@ -1,5 +1,7 @@
 package com.p34r.blocks;
 
+import org.tinylog.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +22,8 @@ public class WaterRender {
 
     public WaterRender() {
         List<ShaderProgram.ShaderModuleData> shaderModuleDataList = new ArrayList<>();
-        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.vs", GL_VERTEX_SHADER));
-        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/block.fs", GL_FRAGMENT_SHADER));
+        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/water.vs", GL_VERTEX_SHADER));
+        shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/water.fs", GL_FRAGMENT_SHADER));
         shaderProgram = new ShaderProgram(shaderModuleDataList);
 
         createUniforms();
@@ -35,6 +37,9 @@ public class WaterRender {
         ChunkManager chunkManager = scene.getChunkManager();
 
         shaderProgram.bind();
+
+        float time = (float) scene.getTime();
+        uniformsMap.setUniform("time", time);
 
         Fog fog = scene.getFog();
         uniformsMap.setUniform("fog.activeFog", fog.isActive() ? 1 : 0);
@@ -90,6 +95,8 @@ public class WaterRender {
 
     private void createUniforms() {
         uniformsMap = new UniformsMap(shaderProgram.getProgramId());
+
+        uniformsMap.createUniform("time");
 
         uniformsMap.createUniform("projectionMatrix");
         uniformsMap.createUniform("viewMatrix");

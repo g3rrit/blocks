@@ -98,6 +98,7 @@ public class SceneLights {
         uniformsMap.createUniform("ambientLight.factor");
         uniformsMap.createUniform("ambientLight.color");
 
+        /*
         for (int i = 0; i < MAX_POINT_LIGHTS; i++) {
             String name = "pointLights[" + i + "]";
             uniformsMap.createUniform(name + ".position");
@@ -107,6 +108,7 @@ public class SceneLights {
             uniformsMap.createUniform(name + ".att.linear");
             uniformsMap.createUniform(name + ".att.exponent");
         }
+        */
 
         uniformsMap.createUniform("dirLight.color");
         uniformsMap.createUniform("dirLight.direction");
