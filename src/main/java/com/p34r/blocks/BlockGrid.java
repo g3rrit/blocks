@@ -214,17 +214,17 @@ public class BlockGrid {
                 Vector2i texCoordsOffset = blockType.getTexCoordsOffset();
                 /*
                 grids[side].texCoords = new float[]{
-                        0, 1,
+                        0, 0,
+                        1, 0,
                         1, 1,
                         0, 1,
-                        0, 0,
                 };
                 */
                 grids[side].texCoords = new float[]{
-                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
+                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (0 + texCoordsOffset.y) * TEXTURE_DIV,
+                        (1 + texCoordsOffset.x) * TEXTURE_DIV, (0 + texCoordsOffset.y) * TEXTURE_DIV,
                         (1 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
                         (0 + texCoordsOffset.x) * TEXTURE_DIV, (1 + texCoordsOffset.y) * TEXTURE_DIV,
-                        (0 + texCoordsOffset.x) * TEXTURE_DIV, (0 + texCoordsOffset.y) * TEXTURE_DIV,
                 };
             }
         }

@@ -25,10 +25,6 @@ public class BlockRender {
     public void render(Scene scene, ShadowRender shadowRender) {
         ChunkManager chunkManager = scene.getChunkManager();
 
-        // TODO: do this somewhere else
-        // TODO: also rename it to update or something
-        chunkManager.gc();
-
         shaderProgram.bind();
 
         Fog fog = scene.getFog();
@@ -56,7 +52,6 @@ public class BlockRender {
         }
 
         shadowRender.getShadowBuffer().bindTextures(GL_TEXTURE2);
-
 
         for (int side = 0; side < 6; side++) {
 

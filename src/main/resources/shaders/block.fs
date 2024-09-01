@@ -143,6 +143,7 @@ float textureProj(vec4 shadowCoord, vec2 offset, int idx) {
 
 void main() {
     vec4 text_color = texture(txtSampler, outTextCoord);
+    //text_color = texture(shadowMap[1], outTextCoord); //texture(txtSampler, outTextCoord);
     vec4 ambient = calcAmbient(ambientLight, text_color + material.ambient);
     vec4 diffuse = text_color;// + material.diffuse;
     vec4 specular = text_color;// + material.specular;

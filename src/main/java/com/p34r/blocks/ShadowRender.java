@@ -13,7 +13,6 @@ public class ShadowRender {
     public ShadowRender() {
         List<ShaderProgram.ShaderModuleData> shaderModuleDataList = new ArrayList<>();
         shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/shadow.vs", GL_VERTEX_SHADER));
-        // test
         shaderModuleDataList.add(new ShaderProgram.ShaderModuleData("/shaders/shadow.fs", GL_FRAGMENT_SHADER));
         shaderProgram = new ShaderProgram(shaderModuleDataList);
 
@@ -69,6 +68,9 @@ public class ShadowRender {
                     // TODO: only run for the sides that are actually needed
                     for (int side = 0; side < 6; side++) {
                         if (chunk.isSideEmpty(BlockMaterial.SOLID, side)) {
+                            continue;
+                        }
+                        if (side == Side.BOTTOM) {
                             continue;
                         }
 

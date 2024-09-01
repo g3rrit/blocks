@@ -5,6 +5,8 @@ const float SPECULAR_POWER = 10;
 const int NUM_CASCADES = 3;
 const float BIAS = 0.0005;
 const float SHADOW_FACTOR = 0.25;
+const float DEPTH_FACTOR = 0.25;
+
 const float REFLECTANCE = 10;
 
 in vec3 outPosition;
@@ -54,6 +56,11 @@ uniform float time;
 uniform CascadeShadow cascadeshadows[NUM_CASCADES];
 uniform sampler2D shadowMap[NUM_CASCADES];
 
+uniform sampler2D camDepthText;
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+
 vec4 calcAmbient(AmbientLight ambientLight, vec4 ambient) {
     return vec4(ambientLight.factor * ambientLight.color, 1) * ambient;
 }
@@ -91,7 +98,7 @@ vec4 calcFog(vec3 pos, vec4 color, Fog fog, vec3 ambientLight, DirLight dirLight
     return vec4(resultColor.xyz, color.w);
 }
 
-float textureProj(vec4 shadowCoord, vec2 offset, int idx) {
+float shadowTextureProj(vec4 shadowCoord, vec2 offset, int idx) {
      float shadow = 1.0;
 
      if (shadowCoord.z > -1.0 && shadowCoord.z < 1.0) {
@@ -104,13 +111,13 @@ float textureProj(vec4 shadowCoord, vec2 offset, int idx) {
      return shadow;
  }
 
- float calcShadow(vec4 worldPosition, int idx) {
-     vec4 shadowMapPosition = cascadeshadows[idx].projViewMatrix * worldPosition;
-     float shadow = 1.0;
-     vec4 shadowCoord = (shadowMapPosition / shadowMapPosition.w) * 0.5 + 0.5;
-     shadow = textureProj(shadowCoord, vec2(0, 0), idx);
-     return shadow;
- }
+float calcShadow(vec4 worldPosition, int idx) {
+    vec4 shadowMapPosition = cascadeshadows[idx].projViewMatrix * worldPosition;
+    float shadow = 1.0;
+    vec4 shadowCoord = (shadowMapPosition / shadowMapPosition.w) * 0.5 + 0.5;
+    shadow = shadowTextureProj(shadowCoord, vec2(0, 0), idx);
+    return shadow;
+}
 
 const float WATER_AMPLITUDE = 0.08;
 const float WATER_WAVELENGTH = 4;
@@ -162,9 +169,5 @@ void main() {
         fragColor = calcFog(outPosition, fragColor, fog, ambientLight.color, dirLight);
     }
 
-    //fragColor.xyz = normal;
-    //fragColor.y = 0;
     fragColor.a = 0.85;
-
-    text_color = texture(txtSampler, outTextCoord);
 }

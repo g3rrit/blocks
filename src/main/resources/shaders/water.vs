@@ -41,7 +41,6 @@ void main()
 {
     vec4 m_pos = modelMatrix * vec4(position, 1.0);
     m_pos.y += calcWaterHeight(m_pos.x, m_pos.z);
-    //mat4 modelViewMatrix = viewMatrix * modelMatrix;
     vec4 mvPosition = viewMatrix * m_pos;
     gl_Position = projectionMatrix * mvPosition;
     outTextCoord = textCoord;

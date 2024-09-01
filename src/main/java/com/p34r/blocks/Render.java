@@ -15,6 +15,7 @@ public class Render {
     private BlockRender blockRender;
     private WaterRender waterRender;
     private ShadowRender shadowRender;
+    private CameraDepthRender cameraDepthRender;
 
     public Render(Window window) {
         GL.createCapabilities();
@@ -34,6 +35,7 @@ public class Render {
         blockRender = new BlockRender();
         shadowRender = new ShadowRender();
         waterRender = new WaterRender();
+        cameraDepthRender = new CameraDepthRender();
     }
 
     public void cleanup() {
@@ -45,6 +47,10 @@ public class Render {
     }
 
     public void render(Window window, Scene scene) {
+        ChunkManager chunkManager = scene.getChunkManager();
+        chunkManager.gc();
+
+        cameraDepthRender.render(scene);
         shadowRender.render(scene);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

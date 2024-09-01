@@ -52,7 +52,7 @@ public class Scene {
         // update dirlight
         float ny = (float)Math.sin(time);
         float nz = (float)Math.cos(time);
-        sceneLights.getDirLight().setDirection(new Vector3f(0.3f, ny, nz));
+        //sceneLights.getDirLight().setDirection(new Vector3f(0.3f, ny, nz));
 
     }
 

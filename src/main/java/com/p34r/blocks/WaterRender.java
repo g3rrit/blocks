@@ -1,7 +1,5 @@
 package com.p34r.blocks;
 
-import org.tinylog.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +64,6 @@ public class WaterRender {
         }
 
         shadowRender.getShadowBuffer().bindTextures(GL_TEXTURE2);
-
 
         for (int side = 0; side < 6; side++) {
 
