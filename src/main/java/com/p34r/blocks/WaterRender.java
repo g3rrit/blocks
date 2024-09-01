@@ -36,6 +36,9 @@ public class WaterRender {
 
         shaderProgram.bind();
 
+        uniformsMap.setUniform("reflectionTexture", 10);
+        uniformsMap.setUniform("refractionTexture", 11);
+
         float time = (float) scene.getTime();
         uniformsMap.setUniform("time", time);
 
@@ -94,6 +97,9 @@ public class WaterRender {
         uniformsMap = new UniformsMap(shaderProgram.getProgramId());
 
         uniformsMap.createUniform("time");
+
+        uniformsMap.createUniform("reflectionTexture");
+        uniformsMap.createUniform("refractionTexture");
 
         uniformsMap.createUniform("projectionMatrix");
         uniformsMap.createUniform("viewMatrix");

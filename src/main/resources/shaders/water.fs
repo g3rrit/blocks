@@ -7,6 +7,7 @@ const float BIAS = 0.0005;
 const float SHADOW_FACTOR = 0.25;
 const float DEPTH_FACTOR = 0.25;
 
+const float DIFFUSE_INTENSITY = 0.2;
 const float REFLECTANCE = 10;
 
 in vec3 outPosition;
@@ -56,7 +57,9 @@ uniform float time;
 uniform CascadeShadow cascadeshadows[NUM_CASCADES];
 uniform sampler2D shadowMap[NUM_CASCADES];
 
-uniform sampler2D camDepthText;
+uniform sampler2D reflectionTexture;
+uniform sampler2D refractionTexture;
+uniform sampler2D dudv;
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -71,7 +74,7 @@ vec4 calcLightColor(vec4 diffuse, vec4 specular, vec3 lightColor, float light_in
 
     // Diffuse Light
     float diffuseFactor = max(dot(normal, to_light_dir), 0.0);
-    diffuseColor = diffuse * vec4(lightColor, 1.0) * light_intensity * diffuseFactor;
+    diffuseColor = diffuse * vec4(lightColor, 1.0) * light_intensity * diffuseFactor * DIFFUSE_INTENSITY;
 
     // Specular Light
     vec3 camera_direction = normalize(-position);
@@ -145,9 +148,11 @@ vec3 calcNormal(vec3 pos) {
  }
 
 void main() {
+    vec4 reflectionColor = texture(reflectionTexture, outTextCoord);
+    vec4 refractionColor = texture(refractionTexture, outTextCoord);
     vec4 text_color = texture(txtSampler, outTextCoord);
     vec4 ambient = calcAmbient(ambientLight, text_color);
-    vec4 diffuse = vec4(0, 0, 1, 1);
+    vec4 diffuse = vec4(0.4, 0.4, 1, 1);
     vec4 specular = vec4(1, 1, 1, 1);
 
     vec3 normal = calcNormal(outWorldPosition.xyz);
