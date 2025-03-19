@@ -6,7 +6,9 @@ public enum BlockType {
     AIR(0, 0, 0, 0, true, BlockMaterial.AIR),
     GRASS(1, 0, 0, 1, false, BlockMaterial.SOLID),
     DIRT(2, 1, 0, 1, false, BlockMaterial.SOLID),
-    WATER(3, 2, 0, 1, true, BlockMaterial.WATER);
+    WATER(3, 2, 0, 1, true, BlockMaterial.WATER),
+    WOOD(4, 3, 0, 1, false, BlockMaterial.SOLID),
+    LEAF(5, 4, 0, 1, false, BlockMaterial.SOLID);
 
     private int idx;
     private Vector2i texCoordsOffset;
